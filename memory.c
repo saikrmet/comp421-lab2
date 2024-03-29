@@ -1,5 +1,27 @@
 #include <stdio.h>
+#include <comp421/hardware.h>
+#include <comp421/yalnix.h>
+#include <stdlib.h>
+#include <string.h>
+#include "handleProcesses.c"
+#include "pcb.c"
+#include "pageTableController.c"
 // inlcude needed headers .
+void createPhysicalPages(unsigned int page_length);
+void startBrk(void *oldBrk);
+void* getBrk();
+void markOccupied(void* ptr1, void* ptr2);
+int numFreePages();
+void startVM();
+int growUserProcessStack(ExceptionInfo *info, struct pcbEntry *head);
+unsigned int findPhysPage();
+unsigned int recentFreePP();
+void freePP(unsigned int idx);
+int SetKernelBrk(void *addr);
+void brkHandler(ExceptionInfo *info);
+void openPageSpace();
+void* getCreatePageSpace();
+void* vToP(void *addr);
 
 // create an empty pagesize space to swap the pages 
 void* createPageSpace;
@@ -67,8 +89,7 @@ int growUserProcessStack(ExceptionInfo *info, struct pcbEntry *head) {
         return -1;
 }
 
-unsigned int
-findPhysPage(){
+unsigned int findPhysPage(){
     int page_index;
     if (isVMInitialized) {
         page_index = 0;
