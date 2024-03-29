@@ -52,16 +52,16 @@ void startVM() {
 
 int growUserProcessStack(ExceptionInfo *info, struct pcbEntry *head) {
     void* addr = info->addr;
-    unsigned long curr = DOWN_TO_PAGE(head->pcb->userStackLimit) / PAGESIZE;
+    unsigned long curr = DOWN_TO_PAGE(head->data->stackSize) / PAGESIZE;
     unsigned long new = DOWN_TO_PAGE(addr) / PAGESIZE;
-    if (new < curr && curr > (unsigned long)(UP_TO_PAGE(head->pcb->brk) / PAGESIZE) && (unsigned long)addr < VMEM_0_LIMIT && (unsigned long)addr > MEM_INVALID_SIZE && curr - new <= numFreePages()) {
+    if (new < curr && curr > (unsigned long)(UP_TO_PAGE(head->data->brk) / PAGESIZE) && (unsigned long)addr < VMEM_0_LIMIT && (unsigned long)addr > MEM_INVALID_SIZE && curr - new <= numFreePages()) {
         for (int c = 0; c < curr - new; c++) {
-            WriteRegister(REG_TLB_FLUSH, (RCS421REGVAL)(curr - 1 - i));
-            head->pcb->pageTable[curr - 1 - i].pfn = findPhysPage();
-            head->pcb->pageTable[curr - 1 - i].uprot = PROT_READ | PROT_WRITE;
-            head->pcb->pageTable[curr - 1 - i].valid = 1;
+            WriteRegister(REG_TLB_FLUSH, (RCS421REGVAL)(curr - 1 - c));
+            head->data->pcbPT[curr - 1 - c].pfn = findPhysPage();
+            head->data->pcbPT[curr - 1 - c].uprot = PROT_READ | PROT_WRITE;
+            head->data->pcbPT[curr - 1 - c].valid = 1;
         }
-        head->pcb->userStackLimit = (void*)DOWN_TO_PAGE(addr);
+        head->data->stackSize = (void*)DOWN_TO_PAGE(addr);
         return 1;
     } else {
         return -1;
@@ -191,7 +191,7 @@ void* vToP(void *addr) {
         v_pfn = page_table[((long)virtual_address - VMEM_1_base) / PAGESIZE].pfn;
     } else {
         struct pcbEntry *currProcess = getHead();
-        v_pfn = currProcess->pcb->pageTable[(long)virtual_address / PAGESIZE].pfn;
+        v_pfn = currProcess->data->pcbPT[(long)virtual_address / PAGESIZE].pfn;
     }
     // procure the physical address needed to offset 
     void* physical_address = (void*) (long)(PAGESIZE * v_pfn);
@@ -199,4 +199,3 @@ void* vToP(void *addr) {
     // add the addr given & PAGEOFFSET to get the offset 
     return (void *) (((long) physical_address) + ((long)addr & PAGEOFFSET) );
 }
-
