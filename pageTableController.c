@@ -1,4 +1,10 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <comp421/hardware.h>
+#include <comp421/yalnix.h>
+#include "memory.c"
+#include "handleProcceses.c"
+
 
 // add headers
 
@@ -10,11 +16,15 @@ struct ptEntry{
     struct ptEntry *next;
     int pfn;
 };
-
 struct pte *page_table;
-
 struct ptEntry *headPTEntry;
-// rename pageTableRecord = ptEntry 
+int activePages(struct pte *page);
+void updateFirstPage(struct pte *page);
+void updatePages(struct pte *page);
+struct pte* initializePageTables();
+struct pte* initializePageTable();
+void initializePTEntry();
+void deletePT(struct pte* pt);
 
 int activePages(struct pte *page) {
     int pages = 0;
