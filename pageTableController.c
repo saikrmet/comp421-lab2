@@ -2,6 +2,14 @@
 
 // add headers
 
+//  create a linked list structure. 
+struct ptEntry{
+    void *base;
+    int region1_free;
+    int region0_free;
+    struct ptEntry *next;
+    int pfn;
+};
 
 struct pte *page_table;
 
@@ -82,7 +90,7 @@ struct pte* initializePageTable() {
         else if (curr->region1_free == -1) {
             curr->region1_free = 1;
             struct pte *tempPT = (struct pte*) ((long)curr->base + PAGE_TABLE_SIZE)
-        }
+        } 
         else {
             if (curr->next) {
                 break
