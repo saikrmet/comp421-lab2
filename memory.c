@@ -130,12 +130,12 @@ int SetKernelBrk(void *addr) {
 }
 
 void brkHandler(ExceptionInfo *info) {
-	struct pcbEntry *process = getRunningNode();
-	struct processControlBlock *block = process->block;
-	void *k_brk = block->k_brk;
-	void *stack = block->stack;
+	struct pcbEntry *process = getActivePCB();
+	struct pcbStruct *block = process->data;
+	void *k_brk = block->brk;
+	void *stack = block->stackSize;
 
-	struct pte *user_page_table = block->pageTable;
+	struct pte *user_page_table = block->pcbPT;
 
     void *addr = (void*)info->regs[1];
 
@@ -151,26 +151,25 @@ void brkHandler(ExceptionInfo *info) {
         // set valid to false 
         // free the current page 
         // and lastly write to the register to flush the TLB
-        for (int c = 0; c < (long)UP_TO_PAGE(brk) - (long)UP_TO_PAGE(addr) / PAGESIZE; c++) {
-            user_page_table[(long)UP_TO_PAGE(brk) / PAGESIZE - 1 - i].valid = 0; 
-            freePhysPage(user_page_table[(long)UP_TO_PAGE(k_brk) / PAGESIZE - 1 - i].pfn);
+        for (int c = 0; c < (long)UP_TO_PAGE(k_brk) - (long)UP_TO_PAGE(addr) / PAGESIZE; c++) {
+            user_page_table[(long)UP_TO_PAGE(k_brk) / PAGESIZE - 1 - i].valid = 0; 
+            freePP(user_page_table[(long)UP_TO_PAGE(k_brk) / PAGESIZE - 1 - i].pfn);
             WriteRegister(REG_TLB_FLUSH, (RCS421RegVal)((long)UP_TO_PAGE(k_brk) / PAGESIZE - 1 - i));
         }
     } else if (UP_TO_PAGE(k_brk) < UP_TO_PAGE(addr)) {
-        int numNeededPages = ((long)UP_TO_PAGE(addr) - (long)UP_TO_PAGE(k_brk))/PAGESIZE;
 		// not enough physical memory
 		if(freePhysPage() < ((long)UP_TO_PAGE(addr) - (long)UP_TO_PAGE(k_brk)) / PAGESIZE) {
 			info->regs[0] = ERROR;
 			return;
 		} else {
 			for(int c = 0; c < ((long)UP_TO_PAGE(addr) - (long)UP_TO_PAGE(k_brk)) / PAGESIZE; c++) {
-				user_page_table[c + (long)UP_TO_PAGE(brk) / PAGESIZE].valid = 1;
-				user_page_table[c + (long)UP_TO_PAGE(brk) / PAGESIZE].pfn = findPhysPage();
+				user_page_table[c + (long)UP_TO_PAGE(k_brk) / PAGESIZE].valid = 1;
+				user_page_table[c + (long)UP_TO_PAGE(k_brk) / PAGESIZE].pfn = findPhysPage();
 			}
         }
     }
 
-    block->k_brk = (void*)UP_TO_PAGE(addr);
+    block->brk = (void*)UP_TO_PAGE(addr);
     info->regs[0] = 0;
 }
 
