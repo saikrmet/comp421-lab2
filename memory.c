@@ -7,18 +7,16 @@ void* createPageSpace;
 int vm_enabled = 0;
 // total physical pages. 
 int p_pages = -1;
-// check if the physical page is free or not
-int *p_page_free; 
+// check if the physical page is occupied or not
+int *p_page_occ; 
 // set pointer to virtual memory 1 
 void *brk = (void*)VMEM_1_BASE;
 
 void createPhysicalPages(unsigned int page_length) {
-    p_page_free = malloc((page_length / PAGESIZE) * sizeof(int));
-    memset(p_page_free, 0, (page_length / PAGESIZE));
+    p_page_occ = malloc((page_length / PAGESIZE) * sizeof(int));
+    memset(p_page_occ, 0, (page_length / PAGESIZE));
 
-    for (int c = DOWN_TO_PAGE((void*)VMEM_1_BASE) / PAGESIZE; c < UP_TO_PAGE(brk) / PAGESIZE; c++){
-        p_page_free[c] = 1;
-    }
+    markOccupied((void*) VMEM_1_BASE, brk);
 }
 
 void startBrk(void *oldBrk) {
@@ -29,14 +27,18 @@ void* getBrk() {
     return brk;
 }
 
-
+void markOccupied(void* ptr1, void* ptr2) {
+    for (int c = DOWN_TO_PAGE(ptr1) / PAGESIZE; c < UP_TO_PAGE(ptr2) / PAGESIZE; c++){
+        p_page_occ[c] = 1;
+    }
+}
 
 // since we need to use the number of free pages
 // multiple times throughout this file. 
 int numFreePages() {
     int num = 0;
     for (int c = 0; c < p_pages; c++) {
-        if (p_page_free[c] == 0) {
+        if (p_page_occ[c] == 0) {
             num++;
         }
     }
@@ -74,8 +76,8 @@ findPhysPage(){
         page_index = MEM_INVALID_PAGES;
     }
     for (int c = page_index; c < p_pages; c++) {
-        if (p_page_free[c] == 0) {
-            p_page_free[c] = 1;
+        if (p_page_occ[c] == 0) {
+            p_page_occ[c] = 1;
             return c;
         }
     }
@@ -83,19 +85,19 @@ findPhysPage(){
 }
 
 unsigned int recentFreePP() {
-    if (p_page_free[DOWN_TO_PAGE(VMEM_1_LIMIT - 1) / PAGESIZE] == 1) {
+    if (p_page_occ[DOWN_TO_PAGE(VMEM_1_LIMIT - 1) / PAGESIZE] == 1) {
         Halt();
     }
-    p_page_free[DOWN_TO_PAGE(VMEM_1_LIMIT - 1) / PAGESIZE] = 1;
+    p_page_occ[DOWN_TO_PAGE(VMEM_1_LIMIT - 1) / PAGESIZE] = 1;
     return DOWN_TO_PAGE(VMEM_1_LIMIT - 1) / PAGESIZE;
 }
 
 // free the physical page 
 void freePP(unsigned int idx){
-	if(p_page_free[idx] == 0){
+	if(p_page_occ[idx] == 0){
 		Halt();
 	}
-	p_page_free[idx] = 0;
+	p_page_occ[idx] = 0;
 }
 
 int SetKernelBrk(void *addr) {
@@ -108,10 +110,8 @@ int SetKernelBrk(void *addr) {
                 page_table[c + ((long)brk - VMEM_1_BASE) / PAGESIZE].valid = 1;
                 page_table[c + ((long)brk - VMEM_1_BASE) / PAGESIZE].pfn = findPhysPage();
             }
-            if(p_page_free != NULL){
-                for (int c = DOWN_TO_PAGE(brk) / PAGESIZE; c < UP_TO_PAGE(addr) / PAGESIZE; c++){
-                    p_page_free[i] = 1;
-                }
+            if(p_page_occ != NULL){
+                markOccupied(brk, addr);
             }
             brk = (void*)UP_TO_PAGE(addr);
         } else {
@@ -121,12 +121,10 @@ int SetKernelBrk(void *addr) {
         }
     } else {
         if ((long)brk - PAGESIZE >= (long)addr) return -1;
-        if(p_page_free != NULL){
-                for (int c = DOWN_TO_PAGE(brk) / PAGESIZE; c < UP_TO_PAGE(addr) / PAGESIZE; c++){
-                    p_page_free[i] = 1;
-                }
-            }
-            brk = (void*)UP_TO_PAGE(addr);
+        if (p_page_occ != NULL){
+                markOccupied(brk, addr);
+        }
+        brk = (void*)UP_TO_PAGE(addr);
     }
     return 0;
 }
