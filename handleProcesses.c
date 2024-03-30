@@ -1,12 +1,11 @@
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <comp421/hardware.h>
 #include <comp421/yalnix.h>
-#include "trphandler.c"
-#include "pcb.c"
-#include "pageTableController.c"
-#include "contextSwitch.c"
+#include "trapHandling.h"
+#include "pcb.h"
+#include "pageTableController.h"
+#include "contextSwitch.h"
 
 
 int currPid = 2; 
@@ -15,11 +14,6 @@ struct pcbEntry *waitEntry = NULL;
 struct pcbStruct* waitPcb;
 struct pcbEntry* exitProcess = NULL;
 int clockTick = -1;
-
-struct pcbEntry {
-    struct pcbStruct *data;
-    struct pcbEntry *next;
-};
 
 int isWaiting = 0;
 
@@ -78,8 +72,6 @@ void handleExitProcess() {
     }
     createProcess(1);
 }
-
-
 
 void addPcbEntry(struct pcbStruct *pcb) {
     struct pcbEntry *newpcb = malloc(sizeof(struct pcbEntry));
