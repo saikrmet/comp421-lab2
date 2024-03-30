@@ -1,17 +1,7 @@
 #include <stdlib.h>
 #include <comp421/hardware.h>
 #include <comp421/yalnix.h>
-
-
-struct bufStruct *bufs;
-
-struct bufStruct {
-    char term_buffer[TERMINAL_MAX_LINE];
-    int size;
-    int head;
-    int tail;
-    
-};
+#include "terminalHandler.h"
 
 // create a helper for read to go thru the buf and see if theres a new line
 int newline(int terminal) {
