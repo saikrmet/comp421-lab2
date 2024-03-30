@@ -6,6 +6,7 @@
 #include "pcb.h"
 #include "pageTableController.h"
 #include "contextSwitch.h"
+#include "handleProcesses.h"
 
 
 int currPid = 2; 
@@ -17,13 +18,16 @@ int clockTick = -1;
 
 int isWaiting = 0;
 
+void switchIdle(struct pcbStruct* newPcb);
 void createWaitProcess(struct pcbStruct* pcb) {
     waitEntry = malloc(sizeof(struct pcbEntry));
     waitPcb = pcb;
     waitEntry->data = waitPcb;
     waitEntry->next = NULL;
 }
-
+int checkBlocking(struct pcbStruct* entry) {
+    return entry->callRead != -1 || entry->callProduce != -1 || entry->termProducing != -1 || entry->termReading != -1 || entry->blockProcess != 0 || entry->delayTicks >= 1;
+}
 int createClockTickPid() {
     int new_pid;
     if (isWaiting == 1) {
@@ -60,6 +64,54 @@ void cleanExitProcess() {
     free(exitProcess->data);
     free(exitProcess);
     exitProcess = NULL;
+}
+
+void createProcess(int terminate) {
+    if (terminate) {
+        isWaiting = 1;
+        clockTick = 0;
+        struct pcbEntry* entry = start;
+        start = start->next;
+        changePcb(waitPcb, start->data);
+    }
+    else {
+        if (!checkBlocking(start->data) && isWaiting == 1) {
+            isWaiting = 0;
+            changePcb(waitPcb, start->data);
+        
+            return;
+        }
+        if (!(start->next)) {
+            switchIdle(start->data);
+            return;
+        }
+        struct pcbEntry* process = start->next;
+        while (process) {
+            int not_blocked = !checkBlocking(process->data);
+            if (not_blocked) {
+                break;
+            }
+            process = process->next;
+        }
+        if (!process) {
+            switchIdle(getActivePcb()->data);
+            return;
+        }
+        struct pcbEntry* curr_entry = start;
+        struct pcbEntry* activePcb = getActivePcb();
+        while (curr_entry->next) {
+            curr_entry = curr_entry->next;
+        }
+        while (process != start) {
+            curr_entry->next = start;
+            curr_entry = curr_entry->next;
+            start = start->next;
+            curr_entry->next = NULL;
+        }
+        isWaiting = 0;
+        changePcb(activePcb->data, start->data);
+        return;
+    }
 }
 
 void handleExitProcess() {
@@ -111,8 +163,8 @@ void activateProducer(int produce) {
     while (entry) {
         struct pcbStruct *new_pcb = entry->data;
         if (new_pcb->callProduce == produce) {
-            new_pcb->callProduce == - 1;
-            return 
+            new_pcb->callProduce = - 1;
+            return;
         }
         entry = entry->next;
     }
@@ -122,9 +174,9 @@ void activateProducer(int produce) {
 void activateRead(int read) {
     struct pcbEntry *entry = getStartingPcb();
     while (entry) {
-        struct pcbStrict *new_pcb = entry->data;
+        struct pcbStruct *new_pcb = entry->data;
         if (new_pcb->callRead == read) {
-            new_pcb->callRead == -1;
+            new_pcb->callRead = -1;
             return;
         }
         entry = entry->next;
@@ -146,57 +198,8 @@ struct pcbStruct* getProducerProcess(int id) {
     return NULL;
 }
 
-int checkBlocking(struct pcbStruct* entry) {
-    return entry->callRead != -1 || entry->callProduce != -1 || pcb->termProducing != -1 || pcb->termReading != -1 || pcb->blockProcess != 0 || pcb->delayTicks >= 1;
-}
 
-void createProcess(int terminate) {
-    if (terminate) {
-        isWaiting = 1;
-        clock_tick = 0;
-        struct pcbEntry* entry = start;
-        start = start->next;
-        changePcb(waitPcb, start->data);
-    }
-    else {
-        if (!checkBlocking(start->data) && isWaiting == 1) {
-            isWaiting = 0;
-            changePcb(waitPcb, start->data);
-        
-            return;
-        }
-        if (!(start->next)) {
-            switchIdle(start->data);
-            return;
-        }
-        struct pcbEntry* process = start->next;
-        while (process) {
-            int not_blocked = !isThisProcessBlocked(process->data);
-            if (not_blocked) {
-                break;
-            }
-            process = process->next;
-        }
-        if (!process) {
-            switchIdle(getActivePcb()->data);
-            return;
-        }
-        struct pcbEntry* curr_entry = head;
-        struct pcbEntry* activePcb = getActivePcb();
-        while (curr_entry->next) {
-            curr_entry = curr_entry->next;
-        }
-        while (process != start) {
-            curr_entry->next = start;
-            curr_entry = curr_entry->next;
-            start = start->next;
-            curr_entry->next = NULL;
-        }
-        isWaiting = 0;
-        changePcb(activePcb->data, start->data);
-        return;
-    }
-}
+
 
 void switchIdle(struct pcbStruct* newPcb) {
     if (isWaiting != 0) {
