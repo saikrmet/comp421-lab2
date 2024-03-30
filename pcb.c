@@ -1,5 +1,3 @@
-#include <comp421/hardware.h>
-#include <comp421/yalnix.h>
 #include "pageTableController.h"
 #include "handleProcesses.h"
 #include "pcb.h"
@@ -66,10 +64,10 @@ void addTerminatedEntry(struct pcbStruct* pcb, int pid, int status) {
 
     // grab current entry 
     struct terminateEntry *entry = pcb->terminateProcess;
-    if (!entry) {
+    if (entry == NULL) {
         pcb->terminateProcess = temp;
     } else {
-        while (entry->next) {
+        while (entry->next != NULL) {
             entry = entry->next;
         }
         entry->next = temp; 
