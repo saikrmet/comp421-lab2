@@ -1,8 +1,4 @@
 #include <stdio.h>
-#include <comp421/hardware.h>
-#include <comp421/yalnix.h>
-#include <stdlib.h>
-#include <string.h>
 #include "handleProcesses.h"
 #include "pcb.h"
 #include "pageTableController.h"
@@ -16,13 +12,15 @@ int vm_enabled = 0;
 // total physical pages. 
 int p_pages = -1;
 // check if the physical page is occupied or not
-int *p_page_occ; 
+int *p_page_occ = NULL; 
 // set pointer to virtual memory 1 
 void *user_brk = (void*)VMEM_1_BASE;
 
 void createPhysicalPages(unsigned int page_length) {
-    p_page_occ = malloc((page_length / PAGESIZE) * sizeof(int));
-    memset(p_page_occ, 0, (page_length / PAGESIZE));
+    TracePrintf(1, "create physical pages");
+    p_pages = page_length / PAGESIZE;
+    p_page_occ = malloc(sizeof(int) * p_pages);
+    memset(p_page_occ, 0, p_pages);
 
     markOccupied((void*) VMEM_1_BASE, user_brk);
 }
@@ -69,11 +67,13 @@ unsigned int findPhysPage(){
             return c;
         }
     }
+    printf("unable to grab physical page");
     Halt();
 }
 
 unsigned int recentFreePP() {
     if (p_page_occ[DOWN_TO_PAGE(VMEM_1_LIMIT - 1) / PAGESIZE] == 1) {
+        printf("unable to get most recent physical page");
         Halt();
     }
     p_page_occ[DOWN_TO_PAGE(VMEM_1_LIMIT - 1) / PAGESIZE] = 1;
@@ -83,12 +83,18 @@ unsigned int recentFreePP() {
 // free the physical page 
 void freePP(unsigned int idx){
 	if(p_page_occ[idx] == 0){
+        printf("can't free already freed page");
 		Halt();
 	}
 	p_page_occ[idx] = 0;
 }
 
 void brkHandler(ExceptionInfo *exInfo) {
+    void *addr = (void*)exInfo->regs[1];
+    if (MEM_INVALID_SIZE >= UP_TO_PAGE(addr)) {
+        exInfo->regs[0] = ERROR;
+        return; 
+    }
 	struct pcbEntry *process = getActivePcb();
 	struct pcbStruct *block = process->data;
 	void *k_brk = block->brk;
@@ -96,11 +102,11 @@ void brkHandler(ExceptionInfo *exInfo) {
 
 	struct pte *user_page_table = block->pcbPT;
 
-    void *addr = (void*)exInfo->regs[1];
+
 
     // account for addresses that aren't valid
 
-    if (MEM_INVALID_SIZE >= UP_TO_PAGE(addr) || DOWN_TO_PAGE(stack) - 1 <= UP_TO_PAGE(addr)){
+    if (DOWN_TO_PAGE(stack) - 1 <= UP_TO_PAGE(addr)){
         exInfo->regs[0] = ERROR;
         return; 
     }
@@ -135,15 +141,17 @@ void brkHandler(ExceptionInfo *exInfo) {
 }
 
 int SetKernelBrk(void *addr) {
+    TracePrintf(1, "starting setkernelbrk");
     if (vm_enabled == 1) {
         if ((((long)UP_TO_PAGE(addr) - (long)user_brk) / PAGESIZE) <= numFreePages()) {
             int c;
             for (c = 0; c < ((long)UP_TO_PAGE(addr) - (long)user_brk) / PAGESIZE; c++) {
+                unsigned int pp = findPhysPage();
                 if (page_table[c + ((long)user_brk - VMEM_1_BASE) / PAGESIZE].valid == 1) {
                     Halt();
                 }
                 page_table[c + ((long)user_brk - VMEM_1_BASE) / PAGESIZE].valid = 1;
-                page_table[c + ((long)user_brk - VMEM_1_BASE) / PAGESIZE].pfn = findPhysPage();
+                page_table[c + ((long)user_brk - VMEM_1_BASE) / PAGESIZE].pfn = pp;
             }
             if(p_page_occ != NULL){
                 markOccupied(user_brk, addr);
@@ -181,7 +189,7 @@ void* vToP(void *addr) {
         v_pfn = currProcess->data->pcbPT[((long)virtual_address) / PAGESIZE].pfn;
     }
     // procure the physical address needed to offset 
-    void* physical_address = (void*) (long)(PAGESIZE * v_pfn);
+    void* physical_address = (void*) (long)(v_pfn * PAGESIZE);
 
     // add the addr given & PAGEOFFSET to get the offset 
     return (void *) (((long) physical_address) + ((long)addr & PAGEOFFSET));
@@ -195,23 +203,30 @@ void* getCreatePageSpace() {
     return createPageSpace;
 }
 
-int growUserProcessStack(ExceptionInfo *exInfo, struct pcbEntry *head) {
+// curr > brk
+// new < curr
+// VMEM_0_LIMIT > (unsigned long) addr
+// MEM_INVALID_SIZE < (unsigned long) addr
+// diff > 
+int growUserProcessStack(ExceptionInfo *exInfo, struct pcbEntry *entry) {
+    TracePrintf(1, "user process grow start");
+    unsigned long temp_brk = UP_TO_PAGE(entry->data->brk) / PAGESIZE;
     void* addr = exInfo->addr;
-    unsigned long curr = DOWN_TO_PAGE(head->data->stackSize) / PAGESIZE;
+    unsigned long curr = DOWN_TO_PAGE(entry->data->stackSize) / PAGESIZE;
     unsigned long new = DOWN_TO_PAGE(addr) / PAGESIZE;
     int diff = curr - new;
-    if (new < curr && curr > (unsigned long)(UP_TO_PAGE(head->data->brk) / PAGESIZE) && (unsigned long)addr < VMEM_0_LIMIT && (unsigned long)addr > MEM_INVALID_SIZE && diff <= numFreePages()) {
+    if (curr > temp_brk && new < curr && VMEM_0_LIMIT > (unsigned long) addr && MEM_INVALID_SIZE < (unsigned long) addr && diff <= numFreePages()) {
         int c;
         for (c = 0; c < diff; c++) {
+            entry->data->pcbPT[curr - 1 - c].pfn = findPhysPage();
+            entry->data->pcbPT[curr - 1 - c].uprot = PROT_READ | PROT_WRITE;
+            entry->data->pcbPT[curr - 1 - c].valid = 1;
             WriteRegister(REG_TLB_FLUSH, (RCS421RegVal)(curr - 1 - c));
-            head->data->pcbPT[curr - 1 - c].pfn = findPhysPage();
-            head->data->pcbPT[curr - 1 - c].uprot = PROT_READ | PROT_WRITE;
-            head->data->pcbPT[curr - 1 - c].valid = 1;
         }
-        head->data->stackSize = (void*)DOWN_TO_PAGE(addr);
+        entry->data->stackSize = (void*)DOWN_TO_PAGE(addr);
         return 1;
     } else {
-        return -1;
+        return 0;
     }
 
 }
