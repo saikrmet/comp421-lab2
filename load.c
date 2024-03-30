@@ -270,7 +270,7 @@ LoadProgram(char *name, char **args, struct pcbStruct* loadPCB, ExceptionInfo* e
      *  Read the text and data from the file into memory.
      */
     if (read(fd, (void *)MEM_INVALID_SIZE, li.text_size+li.data_size)
-	!= li.text_size+li.data_size) {
+	!= (long) li.text_size+li.data_size) {
 	TracePrintf(0, "LoadProgram: couldn't read for '%s'\n", name);
 	free(argbuf);
 	close(fd);
@@ -337,7 +337,7 @@ LoadProgram(char *name, char **args, struct pcbStruct* loadPCB, ExceptionInfo* e
     // >>>> Initialize psr for the current process to 0.
     exInfo->psr = 0;
     for (i = 0; i < NUM_REGS; i++) {
-        exInfo->regs[i] = 0
+        exInfo->regs[i] = 0;
     }
 
     return (0);
