@@ -19,6 +19,7 @@ int clockTick = -1;
 int isWaiting = 0;
 
 void switchIdle(struct pcbStruct* newPcb);
+
 void createWaitProcess(struct pcbStruct* pcb) {
     waitEntry = malloc(sizeof(struct pcbEntry));
     waitPcb = pcb;
@@ -56,7 +57,7 @@ int minusDelay() {
 }
 
 void cleanExitProcess() {
-    if (!exitProcess) {
+    if (exitProcess == NULL) {
         return;
     }
     deletePT(exitProcess->data->pcbPT);
@@ -67,6 +68,7 @@ void cleanExitProcess() {
 }
 
 void createProcess(int terminate) {
+    TracePrintf(1, "create process");
     if (terminate) {
         isWaiting = 1;
         clockTick = 0;
@@ -78,28 +80,27 @@ void createProcess(int terminate) {
         if (!checkBlocking(start->data) && isWaiting == 1) {
             isWaiting = 0;
             changePcb(waitPcb, start->data);
-        
             return;
         }
-        if (!(start->next)) {
+        if (start->next == NULL) {
             switchIdle(start->data);
             return;
         }
         struct pcbEntry* process = start->next;
-        while (process) {
+        while (process != NULL) {
             int not_blocked = !checkBlocking(process->data);
             if (not_blocked) {
                 break;
             }
             process = process->next;
         }
-        if (!process) {
+        if (process == NULL) {
             switchIdle(getActivePcb()->data);
             return;
         }
         struct pcbEntry* curr_entry = start;
         struct pcbEntry* activePcb = getActivePcb();
-        while (curr_entry->next) {
+        while (curr_entry->next != NULL) {
             curr_entry = curr_entry->next;
         }
         while (process != start) {
@@ -115,11 +116,12 @@ void createProcess(int terminate) {
 }
 
 void handleExitProcess() {
-    if (exitProcess) {
+    TracePrintf(1, "exiting process occurring");
+    if (exitProcess != NULL) {
         Halt();
     }
     exitProcess = start;
-    if (!exitProcess->next) {
+    if (exitProcess->next == NULL) {
         Halt();
     }
     createProcess(1);
@@ -173,7 +175,7 @@ void activateProducer(int produce) {
 
 void activateRead(int read) {
     struct pcbEntry *entry = getStartingPcb();
-    while (entry) {
+    while (entry != NULL) {
         struct pcbStruct *new_pcb = entry->data;
         if (new_pcb->callRead == read) {
             new_pcb->callRead = -1;
@@ -202,6 +204,7 @@ struct pcbStruct* getProducerProcess(int id) {
 
 
 void switchIdle(struct pcbStruct* newPcb) {
+    TracePrintf(1, "switchIdle");
     if (isWaiting != 0) {
         if (waitPcb == newPcb) {
             return;
