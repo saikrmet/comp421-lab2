@@ -13,10 +13,7 @@
 #include "terminalHandler.h"
 #include "contextSwitch.h"
 
-
-
 void KernelStart(ExceptionInfo *info, unsigned int pmem_size, void *orig_brk, char **cmd_args){
-
     int initActive = 1;
 
     startBrk(orig_brk);
@@ -68,14 +65,21 @@ void KernelStart(ExceptionInfo *info, unsigned int pmem_size, void *orig_brk, ch
 
     //Create init process
     struct pcbStruct* init = createPcb(1, -1, idle);
+
+    char* args[2] = {"idle", NULL};
+
+    if (LoadProgram(args[0], args, idle, info) != 0){
+    	TracePrintf(1, "Error loading idle process\n");
+    }
+
     forkPcb(idle, init);
 
-    if (initActive){
+    if (initActive == 1){
         initActive = 0;
-        if (!cmd_args[0]) {
+        if (cmd_args[0] == NULL) {
             char* loadInputs[2] = {"init", NULL};
             if (LoadProgram(loadInputs[0], loadInputs, init, info) != 0){
-            	printf("Error encountered in loading program");
+            	printf("Error encountered in loading init program");
             	Halt();
             }
         } else {
