@@ -73,7 +73,7 @@ void exit_handler(ExceptionInfo *exInfo, int wasProgramErr) {
 
     struct pcbEntry* activeProcess = getActivePcb();
     struct pcbStruct* prevPCB = activeProcess->data;
-    int prevPid = data->parentPid;
+    int prevPid = prevPCB->parentPid;
 
     int status;
     if (wasProgramErr) {
@@ -125,11 +125,11 @@ void fork_handler(ExceptionInfo *exInfo) {
 
     int nextPid = popNewPid();
     int currPid = getCurrPid();
-    struct pcbStruct* nextPCB = createPcb(nextPid, currPid, currPid);
+    struct pcbStruct* nextPCB = createPcb(nextPid, currPid, prevPCB);
     prevPCB->children++;
     forkPcb(prevPCB, nextPCB);
 
-    exInfo->regs[0] = (currPid != nextPid) ? childPid : 0;
+    exInfo->regs[0] = (currPid != nextPid) ? nextPid : 0;
 }
 
 void delay_handler(ExceptionInfo *exInfo) {
@@ -276,37 +276,37 @@ void trap_math_handler(ExceptionInfo *exInfo) {
 
     switch (terminal) {
         case TRAP_MATH_FLTDIV:
-            printf("Float div-zero, PID %d\n", pid);
+            printf("Float div-zero, PID %d\n", currPid);
             break;
         case TRAP_MATH_FLTOVF:
-            printf("Float overflow, PID %d\n", pid);
+            printf("Float overflow, PID %d\n", currPid);
             break;
         case TRAP_MATH_FLTUND:
-            printf("Float underflow, PID %d\n", pid);
+            printf("Float underflow, PID %d\n", currPid);
             break;
         case TRAP_MATH_FLTRES:
-            printf("Float inexact, PID %d\n", pid);
+            printf("Float inexact, PID %d\n", currPid);
             break;
         case TRAP_MATH_FLTINV:
-            printf("Invalid float op, PID %d\n", pid);
+            printf("Invalid float op, PID %d\n", currPid);
             break;
         case TRAP_MATH_FLTSUB:
-            printf("FP subscript range, PID %d\n", pid);
+            printf("FP subscript range, PID %d\n", currPid);
             break;
         case TRAP_MATH_INTDIV:
-            printf("Int div-zero, PID %d\n", pid);
+            printf("Int div-zero, PID %d\n", currPid);
             break;
         case TRAP_MATH_INTOVF:
-            printf("Int overflow, PID %d\n", pid);
+            printf("Int overflow, PID %d\n", currPid);
             break;
         case TRAP_MATH_KERNEL:
-            printf("SIGFPE from Kernel, PID %d\n", pid);
+            printf("SIGFPE from Kernel, PID %d\n", currPid);
             break;
         case TRAP_MATH_USER:
-            printf("SIGFPE from user, PID %d\n", pid);
+            printf("SIGFPE from user, PID %d\n", currPid);
             break;
         default:
-            printf("Math error, PID %d\n", pid);
+            printf("Math error, PID %d\n", currPid);
     }
     exit_handler(exInfo, 1);
 }
