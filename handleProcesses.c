@@ -68,13 +68,14 @@ void cleanExitProcess() {
 }
 
 void createProcess(int terminate) {
-    TracePrintf(1, "create process \n %d", terminate);
+    TracePrintf(1, "create process %d \n", terminate);
     if (terminate) {
         isWaiting = 1;
         clockTick = 0;
         struct pcbEntry* entry = start;
         start = start->next;
-        changePcb(start->data, waitPcb);
+        
+        changePcb(waitPcb, start->data);
     }
     else {
         if (!checkBlocking(start->data) && isWaiting == 1) {

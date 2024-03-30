@@ -212,7 +212,7 @@ void trap_tty_transmit_handler(ExceptionInfo *exInfo) {
 
 
 void trap_clock_handler(ExceptionInfo *exInfo) {
-    TracePrintf(1, "trap clock");
+    TracePrintf(1, "trap clock \n");
     if ((minusDelay() == 1 && getCurrPid() == 0) || createClockTickPid()) {
         createProcess(0);
     }
