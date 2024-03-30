@@ -58,7 +58,7 @@ struct pte* initializePageTables() {
     page_table = malloc(PAGE_TABLE_SIZE);
 
     for (int c = 0; c < PAGE_TABLE_LEN; c++) {
-        if (c < UP_TO_PAGE((long)getKernelBrk() - (long)VMEM_1_BASE) / PAGESIZE) {
+        if (c < UP_TO_PAGE((long)getBrk() - (long)VMEM_1_BASE) / PAGESIZE) {
             page_table[c].kprot = PROT_READ | PROT_WRITE;
             page_table[c].valid = 1;
         }
@@ -81,16 +81,16 @@ struct pte* initializePageTable() {
     for (;;) {
         if (curr->region0_free == -1) {
             curr->region0_free = 1;
-            struct pte *tempPT = (struct pte*) ((long) current->pageBase);
+            struct pte *tempPT = (struct pte*) ((long) curr->base);
             return tempPT;
         } 
         else if (curr->region1_free == -1) {
             curr->region1_free = 1;
-            struct pte *tempPT = (struct pte*) ((long)curr->base + PAGE_TABLE_SIZE)
+            struct pte *tempPT = (struct pte*) ((long)curr->base + PAGE_TABLE_SIZE);
         } 
         else {
             if (curr->next) {
-                break
+                break;
             }
             else {
                 curr = curr->next;
@@ -102,13 +102,13 @@ struct pte* initializePageTable() {
     if (!entry) {
         Halt();
     }
-    entry->pfn = freePP();
+    entry->pfn = findPhysPage();
     entry->region1_free = 1;
     entry->region0_free = -1;
     entry->next = NULL;
     entry->base = new_base_entry;
 
-    page_table[(long)(new_base_entry - VMEM_1_BASE) / PAGESIZE].pfn = freePP();
+    page_table[(long)(new_base_entry - VMEM_1_BASE) / PAGESIZE].pfn = findPhysPage();
     page_table[(long)(new_base_entry - VMEM_1_BASE) / PAGESIZE].valid = 1;
     // update the new entry here
     curr->next = entry;
@@ -119,18 +119,18 @@ struct pte* initializePageTable() {
 void initializePTEntry() {
     struct ptEntry *ptEntry = malloc(sizeof(struct ptEntry));
     // base of the entry needs to be VMEM_1_limit - 1
-    void *base = (void *)DOWN_TO_PAGE(VMEM_1_LIMIT - 1)
+    void *base = (void *)DOWN_TO_PAGE(VMEM_1_LIMIT - 1);
     
     ptEntry->next = NULL;
-    ptEntry->region1_full = -1;
-    ptEntry->region0_full = -1;
+    ptEntry->region1_free = -1;
+    ptEntry->region0_free = -1;
     ptEntry->base = base;
 
     unsigned int get_pfn = recentFreePP();
     ptEntry->pfn = get_pfn;
-    page_table[(long)(pageBase - VMEM_1_BASE) / PAGESIZE].pfn = get_pfn;
+    page_table[(long)(base - VMEM_1_BASE) / PAGESIZE].pfn = get_pfn;
 
-    page_table[(long)(pageBase - VMEM_1_BASE) / PAGESIZE].valid = 1;
+    page_table[(long)(base - VMEM_1_BASE) / PAGESIZE].valid = 1;
 
     headPTEntry = ptEntry; 
 }
