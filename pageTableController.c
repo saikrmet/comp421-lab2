@@ -38,6 +38,7 @@ void updateFirstPage(struct pte *page) {
 }
 
 void updatePages(struct pte *page) {
+    printf("update pages");
     int c;
     for (c = 0; c < PAGE_TABLE_LEN; c++) {
         if (c >= KERNEL_STACK_BASE / PAGESIZE ) {
@@ -55,19 +56,19 @@ void updatePages(struct pte *page) {
 
 // first thing you run when 
 struct pte* initializePageTables() {
-    TracePrintf(1, "starting initialization of page tabels");
+    printf("starting initialization of page tables");
     page_table = malloc(PAGE_TABLE_SIZE);
+    int init = UP_TO_PAGE((long)getBrk() - (long)VMEM_1_BASE) / PAGESIZE;
     int text = ((long)&_etext - (long)VMEM_1_BASE) / PAGESIZE;
     int c;
     for (c = 0; c < PAGE_TABLE_LEN; c++) {
-        if (c < UP_TO_PAGE((long)getBrk() - (long)VMEM_1_BASE) / PAGESIZE) {
-            page_table[c].kprot = PROT_READ | PROT_WRITE;
+        if (c < text) {
+            page_table[c].kprot = PROT_READ | PROT_EXEC;
             page_table[c].valid = 1;
         }
-        else if (c < text) {
+        else if (c < init) {
+            page_table[c].kprot = PROT_READ | PROT_WRITE;
             page_table[c].valid = 1;
-            page_table[c].kprot = PROT_READ | PROT_EXEC;
-            
         }
         else {
             page_table[c].kprot = PROT_READ | PROT_WRITE;
@@ -80,6 +81,7 @@ struct pte* initializePageTables() {
 }
 
 struct pte* initializePageTable() {
+    TracePrintf(1, "starting initialization of page tabel");
     struct ptEntry *curr = headPTEntry;
     for (;;) {
         if (curr->region0_free == -1) {
@@ -120,6 +122,7 @@ struct pte* initializePageTable() {
 
 // fill the entries with the base stats 
 void initializePTEntry() {
+    TracePrintf(1, "starting initialization of page tabels entries");
     struct ptEntry *ptEntry = malloc(sizeof(struct ptEntry));
     // base of the entry needs to be VMEM_1_limit - 1
     void *base = (void *)DOWN_TO_PAGE(VMEM_1_LIMIT - 1);
@@ -139,6 +142,7 @@ void initializePTEntry() {
 }
 
 void deletePT(struct pte* pt) {
+    printf("delete pt)");
     int c;
     for (c = 0; c < VMEM_0_LIMIT / PAGESIZE; c++) {
         if (pt[c].valid == 1) {
@@ -160,7 +164,7 @@ void deletePT(struct pte* pt) {
             } else {
                 curr->region1_free = -1;
             }
-            if (curr->region1_free == - 1 &&curr->region0_free == -1) {
+            if (curr->region1_free == - 1 && curr->region0_free == -1) {
                 if (curr->next == NULL) {
                     freePP(curr->pfn);
                     free(curr);
