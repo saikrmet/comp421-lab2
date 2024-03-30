@@ -25,7 +25,7 @@
 #	For example, the Makefile will make test1 out of test1.c,
 #	if you have a file named test1.c in this directory.
 #
-ALL = yalnix idle init <tests>
+ALL = yalnix idle init samples-lab2/bigstack samples-lab2/blowstack samples-lab2/brktest samples-lab2/console samples-lab2/delaytest samples-lab2/exectest samples-lab2/forktest0 samples-lab2/forktest1 samples-lab2/forktest1b samples-lab2/forktest2 samples-lab2/forktest2b samples-lab2/forktest3 samples-lab2/forkwait0c samples-lab2/forkwait0p samples-lab2/forkwait1 samples-lab2/forkwait1b samples-lab2/forkwait1c samples-lab2/forkwait1d samples-lab2/init samples-lab2/init1 samples-lab2/init2 samples-lab2/init3 samples-lab2/shell samples-lab2/trapillegal samples-lab2/trapmath samples-lab2/trapmemory samples-lab2/ttyread1 samples-lab2/ttywrite1 samples-lab2/ttywrite2 samples-lab2/ttywrite3
 
 #
 #	You must modify the KERNEL_OBJS and KERNEL_SRCS definitions
@@ -34,7 +34,7 @@ ALL = yalnix idle init <tests>
 #	the corresponding source files that make up your kernel.
 #
 KERNEL_OBJS = contextSwitch.o handleProcesses.o kernel.o load.o pageTableController.o memory.o pcb.o terminalHandler.o trapHandling.o
-KERNEL_SRCS = contextSwitch.c handleProcesses.c kernel.c load.c pageTableController.c memory.c pcb.c terminalHandler.c trapHandling.c <tests>
+KERNEL_SRCS = contextSwitch.c handleProcesses.c kernel.c load.c pageTableController.c memory.c pcb.c terminalHandler.c trapHandling.c samples-lab2/bigstack.c samples-lab2/blowstack.c samples-lab2/brktest.c samples-lab2/console.c samples-lab2/delaytest.c samples-lab2/exectest.c samples-lab2/forktest0.c samples-lab2/forktest1.c samples-lab2/forktest1b.c samples-lab2/forktest2.c samples-lab2/forktest2b.c samples-lab2/forktest3.c samples-lab2/forkwait0c.c samples-lab2/forkwait0p.c samples-lab2/forkwait1.c samples-lab2/forkwait1b.c samples-lab2/forkwait1c.c samples-lab2/forkwait1d.c samples-lab2/init.c samples-lab2/init1.c samples-lab2/init2.c samples-lab2/init3.c samples-lab2/shell.c samples-lab2/trapillegal.c samples-lab2/trapmath.c samples-lab2/trapmemory.c samples-lab2/ttyread1.c samples-lab2/ttywrite1.c samples-lab2/ttywrite2.c samples-lab2/ttywrite3.c
 
 #
 #	You should not have to modify anything else in this Makefile
