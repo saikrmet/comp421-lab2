@@ -205,6 +205,8 @@ int growUserProcessStack(ExceptionInfo *exInfo, struct pcbEntry *head) {
         return 1;
     } else {
         return -1;
+    }
+
 }
 
 
