@@ -49,7 +49,7 @@ LoadProgram(char *name, char **args, struct pcbStruct* loadPCB, ExceptionInfo* e
     char *cp2;
     char **cpp;
     char *argbuf;
-    int i;
+    unsigned int i;
     unsigned long argcount;
     int size;
     int text_npg;
@@ -120,7 +120,7 @@ LoadProgram(char *name, char **args, struct pcbStruct* loadPCB, ExceptionInfo* e
      *  value must also be aligned down to a multiple of 8 boundary.
      */
     cp = ((char *)USER_STACK_LIMIT) - size;
-    cpp = (char **)((unsigned long)cp & (-1 << 4));	/* align cpp */
+    cpp = (char **)((unsigned long)cp & (~0UL << 4));	/* align cpp */
     cpp = (char **)((unsigned long)cpp - ((argcount + 4) * sizeof(void *)));
 
     text_npg = li.text_size >> PAGESHIFT;
@@ -270,7 +270,7 @@ LoadProgram(char *name, char **args, struct pcbStruct* loadPCB, ExceptionInfo* e
      *  Read the text and data from the file into memory.
      */
     if (read(fd, (void *)MEM_INVALID_SIZE, li.text_size+li.data_size)
-	!= (long) li.text_size+li.data_size) {
+	!= (ssize_t) (li.text_size+li.data_size)) {
 	TracePrintf(0, "LoadProgram: couldn't read for '%s'\n", name);
 	free(argbuf);
 	close(fd);
