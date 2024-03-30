@@ -14,7 +14,7 @@ int newline(int terminal) {
         if (bufs[terminal].term_buffer[head] == '\n') return 1;
         head = (1+head) % TERMINAL_MAX_LINE;
     }
-    return 0
+    return 0;
 }
 
 void createBufs() {
@@ -27,7 +27,7 @@ void createBufs() {
 }
 
 int read(char *buffer, int terminal, int size) {
-    struct pctStruct *pcb = getActivePcb()->data;
+    struct pcbStruct *pcb = getActivePcb()->data;
     // loop thru until newline
     while (!newline(terminal)) {
         pcb->callRead = terminal;
