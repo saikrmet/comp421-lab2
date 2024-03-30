@@ -15,18 +15,18 @@ void forkMemory(struct pte* pt1, struct pte* pt2) {
 	long pageNum = 0;
 	void* pageSpace = getCreatePageSpace();
 
-	while (pageNum < VMEM_0_LIMIT/PAGESIZE) {
+	while (pageNum < VMEM_0_LIMIT / PAGESIZE) {
 		if (pt1[pageNum].valid != 0) {
+			memcpy(pageSpace, (void*) (pageNum * PAGESIZE), PAGESIZE);
 			temp_uprot = pt1[pageNum].uprot;
 			temp_kprot = pt1[pageNum].kprot;
-			memcpy(pageSpace, (void*) (pageNum * PAGESIZE), PAGESIZE);
 			changeReg0PT(pt2);
 
+			pt2[pageNum].pfn = findPhysPage();
+			pt2[pageNum].valid = 1;
+			memcpy((void*) (pageNum * PAGESIZE), pageSpace, PAGESIZE);
 			pt1[pageNum].uprot = temp_uprot;
 			pt1[pageNum].kprot = temp_kprot;
-			pt2[pageNum].pfn = findPhysPage();
-			memcpy((void*) (pageNum * PAGESIZE), pageSpace, PAGESIZE);
-			pt2[pageNum].valid = 1;
 			changeReg0PT(pt1);
 		}
 		pageNum++;
