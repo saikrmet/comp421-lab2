@@ -1,4 +1,5 @@
 #include <comp421/yalnix.h>
+#include <stdio.h>
 
 int
 main()
@@ -10,6 +11,7 @@ main()
      *  in a TRAP_MEMORY trap.
      */
     x = *(int *)0x123;
+    printf("%d", x);
 
     Exit(1);
 }

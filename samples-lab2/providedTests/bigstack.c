@@ -10,10 +10,7 @@ int
 main()
 {
     char big_buffer[20*1024];
-    int foo;
-    int i;
-
-    foo = 42;
+    unsigned int i;
     for (i = 0; i < sizeof(big_buffer); i++) 
 	force(big_buffer + i);
 

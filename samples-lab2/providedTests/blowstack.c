@@ -7,7 +7,7 @@ void
 foo(int depth)
 {
     char array[65532];
-    int i;
+    unsigned int i;
 
     TracePrintf(0, "blowstack foo: depth %d\n", depth);
 

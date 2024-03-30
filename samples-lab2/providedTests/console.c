@@ -6,7 +6,7 @@
 
 #define MAX_LINE 1024
 
-main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
     int console;
     char buf[TERMINAL_MAX_LINE];

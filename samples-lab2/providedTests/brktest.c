@@ -33,6 +33,7 @@ main()
     }
 
     new = malloc(10000);
+    new[1] = '\0';
 
     Exit(0);
 }
