@@ -26,7 +26,7 @@ void createBufs() {
     }
 }
 
-int read(char *buffer, int terminal, int size) {
+int readBuf(char *buffer, int terminal, int size) {
     struct pcbStruct *pcb = getActivePcb()->data;
     // loop thru until newline
     while (!newline(terminal)) {
@@ -50,7 +50,7 @@ int read(char *buffer, int terminal, int size) {
 }
 
 
-int write(char *buffer, int terminal, int blocked, int size) {
+int writeBuf(char *buffer, int terminal, int blocked, int size) {
     if (blocked) {
         while (!getProducerProcess(terminal)) {
             struct pcbStruct *pcb = getActivePcb()->data;

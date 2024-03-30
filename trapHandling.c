@@ -159,7 +159,7 @@ void tty_read_handler(ExceptionInfo *exInfo) {
         void* buffer = (void*) exInfo->regs[2];
 
         int size = exInfo->regs[3];
-        int retNum = read(buffer, terminal, size);
+        int retNum = readBuf(buffer, terminal, size);
 
         exInfo->regs[0] = (retNum < 0) ? ERROR : retNum;
 
@@ -176,7 +176,7 @@ void tty_write_handler(ExceptionInfo *exInfo) {
         void* buffer = (void*) exInfo->regs[2];
         int size = exInfo->regs[3];
 
-        int retNum = write(buffer, terminal, 1, size);
+        int retNum = writeBuf(buffer, terminal, 1, size);
         TtyTransmit(terminal, buffer, retNum);
 
         struct pcbEntry *activeProcess = getActivePcb();
@@ -194,7 +194,7 @@ void tty_write_handler(ExceptionInfo *exInfo) {
 void trap_tty_receive_handler(ExceptionInfo *exInfo) {
     int terminal = exInfo->code;
     char *chars = malloc(TERMINAL_MAX_LINE * sizeof(char));
-    write(chars, terminal, 0, TtyReceive(terminal, chars, TERMINAL_MAX_LINE));
+    writeBuf(chars, terminal, 0, TtyReceive(terminal, chars, TERMINAL_MAX_LINE));
 
     if (newline(terminal)) {
         activateRead(terminal);

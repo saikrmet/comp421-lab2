@@ -18,21 +18,21 @@ int p_pages = -1;
 // check if the physical page is occupied or not
 int *p_page_occ; 
 // set pointer to virtual memory 1 
-void *brk = (void*)VMEM_1_BASE;
+void *user_brk = (void*)VMEM_1_BASE;
 
 void createPhysicalPages(unsigned int page_length) {
     p_page_occ = malloc((page_length / PAGESIZE) * sizeof(int));
     memset(p_page_occ, 0, (page_length / PAGESIZE));
 
-    markOccupied((void*) VMEM_1_BASE, brk);
+    markOccupied((void*) VMEM_1_BASE, user_brk);
 }
 
 void startBrk(void *oldBrk) {
-    brk = oldBrk;
+    user_brk = oldBrk;
 }
 
 void* getBrk() {
-    return brk;
+    return user_brk;
 }
 
 void markOccupied(void* ptr1, void* ptr2) {
@@ -131,29 +131,29 @@ void brkHandler(ExceptionInfo *exInfo) {
 
 int SetKernelBrk(void *addr) {
     if (vm_enabled == 1) {
-        if ((((long)UP_TO_PAGE(addr) - (long)brk) / PAGESIZE) <= numFreePages()) {
-            for (int c = 0; c < ((long)UP_TO_PAGE(addr) - (long)brk) / PAGESIZE; c++) {
-                if (page_table[c + ((long)brk - VMEM_1_BASE) / PAGESIZE].valid == 1) {
+        if ((((long)UP_TO_PAGE(addr) - (long)user_brk) / PAGESIZE) <= numFreePages()) {
+            for (int c = 0; c < ((long)UP_TO_PAGE(addr) - (long)user_brk) / PAGESIZE; c++) {
+                if (page_table[c + ((long)user_brk - VMEM_1_BASE) / PAGESIZE].valid == 1) {
                     Halt();
                 }
-                page_table[c + ((long)brk - VMEM_1_BASE) / PAGESIZE].valid = 1;
-                page_table[c + ((long)brk - VMEM_1_BASE) / PAGESIZE].pfn = findPhysPage();
+                page_table[c + ((long)user_brk - VMEM_1_BASE) / PAGESIZE].valid = 1;
+                page_table[c + ((long)user_brk - VMEM_1_BASE) / PAGESIZE].pfn = findPhysPage();
             }
             if(p_page_occ != NULL){
-                markOccupied(brk, addr);
+                markOccupied(user_brk, addr);
             }
-            brk = (void*)UP_TO_PAGE(addr);
+            user_brk = (void*)UP_TO_PAGE(addr);
         } else {
             //  return -1 when
             // run out of physical memory or otherwise be unable to satisfy the requirements
             return -1; 
         }
     } else {
-        if ((long)brk - PAGESIZE >= (long)addr) return -1;
+        if ((long)user_brk - PAGESIZE >= (long)addr) return -1;
         if (p_page_occ != NULL){
-                markOccupied(brk, addr);
+                markOccupied(user_brk, addr);
         }
-        brk = (void*)UP_TO_PAGE(addr);
+        user_brk = (void*)UP_TO_PAGE(addr);
     }
     return 0;
 }
