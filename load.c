@@ -120,7 +120,7 @@ LoadProgram(char *name, char **args, struct pcbStruct* loadPCB, ExceptionInfo* e
      *  value must also be aligned down to a multiple of 8 boundary.
      */
     cp = ((char *)USER_STACK_LIMIT) - size;
-    cpp = (char **)((unsigned long)cp & (~0UL << 4));	/* align cpp */
+    cpp = (char **)((unsigned long)cp & (-1 << 4));	/* align cpp */
     cpp = (char **)((unsigned long)cpp - ((argcount + 4) * sizeof(void *)));
 
     text_npg = li.text_size >> PAGESHIFT;
