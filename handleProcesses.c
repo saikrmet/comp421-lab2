@@ -120,7 +120,7 @@ void activateProducer(int produce) {
 }
 
 void activateRead(int read) {
-    struct pcbEntry *entry = getStaringPcb();
+    struct pcbEntry *entry = getStartingPcb();
     while (entry) {
         struct pcbStrict *new_pcb = entry->data;
         if (new_pcb->callRead == read) {
