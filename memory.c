@@ -17,7 +17,7 @@ int *p_page_occ = NULL;
 void *user_brk = (void*)VMEM_1_BASE;
 
 void createPhysicalPages(unsigned int page_length) {
-    TracePrintf(1, "create physical pages");
+    TracePrintf(1, "create physical pages\n");
     p_pages = page_length / PAGESIZE;
     p_page_occ = malloc(sizeof(int) * p_pages);
     memset(p_page_occ, 0, p_pages);
@@ -141,7 +141,7 @@ void brkHandler(ExceptionInfo *exInfo) {
 }
 
 int SetKernelBrk(void *addr) {
-    TracePrintf(1, "starting setkernelbrk");
+    TracePrintf(1, "starting setkernelbrk\n");
     if (vm_enabled == 1) {
         if ((((long)UP_TO_PAGE(addr) - (long)user_brk) / PAGESIZE) <= numFreePages()) {
             int c;
@@ -209,7 +209,7 @@ void* getCreatePageSpace() {
 // MEM_INVALID_SIZE < (unsigned long) addr
 // diff > 
 int growUserProcessStack(ExceptionInfo *exInfo, struct pcbEntry *entry) {
-    TracePrintf(1, "user process grow start");
+    TracePrintf(1, "user process grow start\n");
     unsigned long temp_brk = UP_TO_PAGE(entry->data->brk) / PAGESIZE;
     void* addr = exInfo->addr;
     unsigned long curr = DOWN_TO_PAGE(entry->data->stackSize) / PAGESIZE;

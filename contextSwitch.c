@@ -41,6 +41,7 @@ SavedContext *changePCBFunc(SavedContext *ctxp, void *p1, void *p2) {
 }
 
 void changePcb(struct pcbStruct* activePCB, struct pcbStruct* newPCB) {
+	TracePrintf(1, "change pcnh");
     ContextSwitch(changePCBFunc, &activePCB->sc, (void*) activePCB, (void*) newPCB);
 	cleanExitProcess();
 }

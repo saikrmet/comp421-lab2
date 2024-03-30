@@ -1,0 +1,9 @@
+{
+    "files.associations": {
+        "contextswitch.h": "c",
+        "pcb.h": "c",
+        "handleprocesses.h": "c",
+        "pagetablecontroller.h": "c",
+        "stdlib.h": "c"
+    }
+}

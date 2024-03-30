@@ -36,7 +36,7 @@ int createClockTickPid() {
     } else {
         new_pid = start->data->pid;
     }
-    int isEqual = new_pid == clockTick;
+    int isEqual = (new_pid == clockTick);
     clockTick = new_pid;
     return isEqual;
 }
@@ -47,9 +47,9 @@ int minusDelay() {
     while (entry) {
         if (entry->data->delayTicks >= 1) {
             entry->data->delayTicks -= 1;
-            if (entry->data->delayTicks == 0) {
-                noDelay = 1;
-            }
+        }
+        if (entry->data->delayTicks == 0) {
+            noDelay = 1;
         }
         entry = entry->next;
     }
@@ -68,7 +68,7 @@ void cleanExitProcess() {
 }
 
 void createProcess(int terminate) {
-    TracePrintf(1, "create process");
+    TracePrintf(1, "create process \n %d", terminate);
     if (terminate) {
         isWaiting = 1;
         clockTick = 0;
@@ -116,7 +116,7 @@ void createProcess(int terminate) {
 }
 
 void handleExitProcess() {
-    TracePrintf(1, "exiting process occurring");
+    TracePrintf(1, "exiting process occurring \n");
     if (exitProcess != NULL) {
         Halt();
     }
@@ -165,7 +165,7 @@ void activateProducer(int produce) {
     while (entry) {
         struct pcbStruct *new_pcb = entry->data;
         if (new_pcb->callProduce == produce) {
-            new_pcb->callProduce = - 1;
+            new_pcb->callProduce = -1;
             return;
         }
         entry = entry->next;
@@ -204,7 +204,7 @@ struct pcbStruct* getProducerProcess(int id) {
 
 
 void switchIdle(struct pcbStruct* newPcb) {
-    TracePrintf(1, "switchIdle");
+    TracePrintf(1, "switchIdle called \n");
     if (isWaiting != 0) {
         if (waitPcb == newPcb) {
             return;

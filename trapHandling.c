@@ -41,6 +41,7 @@ void get_pid_handler(ExceptionInfo *exInfo) {
 }
 
 void wait_handler(ExceptionInfo *exInfo) {
+    TracePrintf(1, "wait handler \n");
     int* user_args = (int*) exInfo->regs[1];
     struct pcbEntry* activeProcess = getActivePcb();
     struct pcbStruct* prevPCB = activeProcess->data;
@@ -133,6 +134,7 @@ void fork_handler(ExceptionInfo *exInfo) {
 }
 
 void delay_handler(ExceptionInfo *exInfo) {
+    TracePrintf(1, "delay clock");
     int duration = exInfo->regs[1];
 
     //Invalid delay duration
@@ -210,9 +212,13 @@ void trap_tty_transmit_handler(ExceptionInfo *exInfo) {
 
 
 void trap_clock_handler(ExceptionInfo *exInfo) {
+    TracePrintf(1, "trap clock");
     if ((minusDelay() == 1 && getCurrPid() == 0) || createClockTickPid()) {
         createProcess(0);
     }
+    // decrement the "Delay ticks" of every process by 1
+
+    // If the curent process has run for 2 clock ticks and another one is ready, switch to it
 }
 
 void trap_illegal_handler(ExceptionInfo *exInfo) {

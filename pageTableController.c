@@ -15,9 +15,34 @@ int activePages(struct pte *page) {
     int pages = 0;
     int c;
     for (c = 0; c < PAGE_TABLE_LEN - KERNEL_STACK_PAGES; c++) {
-        pages++;
+        if (page[c].valid == 1) pages++;
     }
     return pages; 
+}
+
+struct ptEntry* getHeadPTEntry() {
+    return headPTEntry;
+}
+
+// fill the entries with the base stats 
+void initializePTEntry() {
+    TracePrintf(1, "starting initialization of page tabels entries\n");
+    struct ptEntry *ptEntry = malloc(sizeof(struct ptEntry));
+    // base of the entry needs to be VMEM_1_limit - 1
+    void *base = (void *)DOWN_TO_PAGE(VMEM_1_LIMIT - 1);
+    
+    ptEntry->next = NULL;
+    ptEntry->region1_free = 0;
+    ptEntry->region0_free = 0;
+    ptEntry->base = base;
+
+    unsigned int get_pfn = recentFreePP();
+    ptEntry->pfn = get_pfn;
+    page_table[(long)(base - VMEM_1_BASE) / PAGESIZE].pfn = get_pfn;
+
+    page_table[(long)(base - VMEM_1_BASE) / PAGESIZE].valid = 1;
+
+    headPTEntry = ptEntry; 
 }
 
 // set the correct fields for the first page
@@ -38,7 +63,7 @@ void updateFirstPage(struct pte *page) {
 }
 
 void updatePages(struct pte *page) {
-    printf("update pages");
+    TracePrintf(1, "update pages");
     int c;
     for (c = 0; c < PAGE_TABLE_LEN; c++) {
         if (c >= KERNEL_STACK_BASE / PAGESIZE ) {
@@ -56,7 +81,7 @@ void updatePages(struct pte *page) {
 
 // first thing you run when 
 struct pte* initializePageTables() {
-    printf("starting initialization of page tables");
+    TracePrintf(1, "starting initialization of page tables\n");
     page_table = malloc(PAGE_TABLE_SIZE);
     int init = UP_TO_PAGE((long)getBrk() - (long)VMEM_1_BASE) / PAGESIZE;
     int text = ((long)&_etext - (long)VMEM_1_BASE) / PAGESIZE;
@@ -81,24 +106,24 @@ struct pte* initializePageTables() {
 }
 
 struct pte* initializePageTable() {
-    TracePrintf(1, "starting initialization of page tabel");
-    struct ptEntry *curr = headPTEntry;
+    TracePrintf(1, "starting initialization of page table\n");
+    struct ptEntry *curr = getHeadPTEntry();
     for (;;) {
-        if (curr->region0_free == -1) {
+        if (curr->region0_free == 0) {
             curr->region0_free = 1;
             struct pte *tempPT = (struct pte*) ((long) curr->base);
             return tempPT;
         } 
-        else if (curr->region1_free == -1) {
+        else if (curr->region1_free == 0) {
             curr->region1_free = 1;
             struct pte *tempPT = (struct pte*) ((long)curr->base + PAGE_TABLE_SIZE);
         } 
         else {
-            if (curr->next) {
-                break;
+            if (curr->next != NULL) {
+                curr = curr->next;
             }
             else {
-                curr = curr->next;
+                break;
             }
         }
     }
@@ -109,7 +134,7 @@ struct pte* initializePageTable() {
     }
     entry->pfn = findPhysPage();
     entry->region1_free = 1;
-    entry->region0_free = -1;
+    entry->region0_free = 0;
     entry->next = NULL;
     entry->base = new_base_entry;
 
@@ -120,29 +145,9 @@ struct pte* initializePageTable() {
     return (struct pte *)((long)new_base_entry + PAGE_TABLE_SIZE);
 }
 
-// fill the entries with the base stats 
-void initializePTEntry() {
-    TracePrintf(1, "starting initialization of page tabels entries");
-    struct ptEntry *ptEntry = malloc(sizeof(struct ptEntry));
-    // base of the entry needs to be VMEM_1_limit - 1
-    void *base = (void *)DOWN_TO_PAGE(VMEM_1_LIMIT - 1);
-    
-    ptEntry->next = NULL;
-    ptEntry->region1_free = -1;
-    ptEntry->region0_free = -1;
-    ptEntry->base = base;
-
-    unsigned int get_pfn = recentFreePP();
-    ptEntry->pfn = get_pfn;
-    page_table[(long)(base - VMEM_1_BASE) / PAGESIZE].pfn = get_pfn;
-
-    page_table[(long)(base - VMEM_1_BASE) / PAGESIZE].valid = 1;
-
-    headPTEntry = ptEntry; 
-}
 
 void deletePT(struct pte* pt) {
-    printf("delete pt)");
+    TracePrintf(1, "delete pt \n");
     int c;
     for (c = 0; c < VMEM_0_LIMIT / PAGESIZE; c++) {
         if (pt[c].valid == 1) {
@@ -160,11 +165,11 @@ void deletePT(struct pte* pt) {
     while (curr) {
         if (curr->base == base) {
             if (isBase) {
-                curr->region0_free = -1;
+                curr->region0_free = 0;
             } else {
-                curr->region1_free = -1;
+                curr->region1_free = 0;
             }
-            if (curr->region1_free == - 1 && curr->region0_free == -1) {
+            if (curr->region1_free == - 1 && curr->region0_free == 0) {
                 if (curr->next == NULL) {
                     freePP(curr->pfn);
                     free(curr);

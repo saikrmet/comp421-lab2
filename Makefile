@@ -25,7 +25,7 @@
 #	For example, the Makefile will make test1 out of test1.c,
 #	if you have a file named test1.c in this directory.
 #
-ALL = yalnix samples-lab2/bigstack samples-lab2/blowstack samples-lab2/brktest samples-lab2/console samples-lab2/delaytest samples-lab2/exectest samples-lab2/forktest0 samples-lab2/forktest1 samples-lab2/forktest1b samples-lab2/forktest2 samples-lab2/forktest2b samples-lab2/forktest3 samples-lab2/forkwait0c samples-lab2/forkwait0p samples-lab2/forkwait1 samples-lab2/forkwait1b samples-lab2/forkwait1c samples-lab2/forkwait1d samples-lab2/init samples-lab2/init1 samples-lab2/init2 samples-lab2/init3 samples-lab2/shell samples-lab2/trapillegal samples-lab2/trapmath samples-lab2/trapmemory samples-lab2/ttyread1 samples-lab2/ttywrite1 samples-lab2/ttywrite2 samples-lab2/ttywrite3
+ALL = yalnix samples-lab2/pidtest samples-lab2/delaymultiple samples-lab2/bigstack samples-lab2/blowstack samples-lab2/brktest samples-lab2/console samples-lab2/delaytest samples-lab2/exectest samples-lab2/forktest0 samples-lab2/forktest1 samples-lab2/forktest1b samples-lab2/forktest2 samples-lab2/forktest2b samples-lab2/forktest3 samples-lab2/forkwait0c samples-lab2/forkwait0p samples-lab2/forkwait1 samples-lab2/forkwait1b samples-lab2/forkwait1c samples-lab2/forkwait1d samples-lab2/init samples-lab2/init1 samples-lab2/init2 samples-lab2/init3 samples-lab2/shell samples-lab2/trapillegal samples-lab2/trapmath samples-lab2/trapmemory samples-lab2/ttyread1 samples-lab2/ttywrite1 samples-lab2/ttywrite2 samples-lab2/ttywrite3
 
 #
 #	You must modify the KERNEL_OBJS and KERNEL_SRCS definitions

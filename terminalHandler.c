@@ -18,7 +18,7 @@ int newline(int terminal) {
 
 
 void createBufs() {
-    TracePrintf(1, "createbufs() start ");
+    TracePrintf(1, "createbufs() start \n");
    // allocate enough so you need to multiply total terminals by size
    bufs = malloc(NUM_TERMINALS * sizeof(struct bufStruct));
    // error with for loop
@@ -27,38 +27,40 @@ void createBufs() {
        bufs[c].head = 0;
        bufs[c].tail = 0;
    }
-   TracePrintf(1, "createbufs() worked ");
+   TracePrintf(1, "createbufs() worked \n ");
 }
 
 
 int readBuf(char *buffer, int terminal, int size) {
-   struct pcbStruct *pcb = getActivePcb()->data;
-   // loop thru until newline
-   while (!newline(terminal)) {
-       pcb->callRead = terminal;
-       createProcess(0);
-   }
-   int chars = 0;
-   int head = bufs[terminal].head;
-   int c;
-   for (c = 0; c < size; c++) {
-       if (bufs[terminal].size < 1) {
-           break;
-       }
-       else {
-           buffer[c] = bufs[terminal].term_buffer[head];
-           head = (1+head) % TERMINAL_MAX_LINE;
-           bufs[terminal].size -= 1;
-           chars += 1;
-       }
-   }
-   return chars;
+    TracePrintf(1, "read buf");
+    struct pcbStruct *pcb = getActivePcb()->data;
+    // loop thru until newline
+    while (!newline(terminal)) {
+        pcb->callRead = terminal;
+        createProcess(0);
+    }
+    int chars = 0;
+    int head = bufs[terminal].head;
+    int c;
+    for (c = 0; c < size; c++) {
+        if (bufs[terminal].size < 1) {
+            break;
+        }
+        else {
+            buffer[c] = bufs[terminal].term_buffer[head];
+            head = (1+head) % TERMINAL_MAX_LINE;
+            bufs[terminal].size -= 1;
+            chars += 1;
+        }
+    }
+    return chars;
 }
 
 
 
 
 int writeBuf(char *buffer, int terminal, int blocked, int size) {
+    TracePrintf(1,"write buf \n");
     if (blocked) {
         while (getProducerProcess(terminal) != NULL) {
             struct pcbStruct *pcb = getActivePcb()->data;

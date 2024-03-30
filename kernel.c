@@ -13,9 +13,10 @@
 #include "terminalHandler.h"
 #include "contextSwitch.h"
 
-void KernelStart(ExceptionInfo *info, unsigned int pmem_size, void *orig_brk, char **cmd_args){
-    int initActive = 1;
+int initActive = 1;
 
+void KernelStart(ExceptionInfo *info, unsigned int pmem_size, void *orig_brk, char **cmd_args){
+    
     startBrk(orig_brk);
     
     createPhysicalPages(pmem_size);
@@ -76,6 +77,7 @@ void KernelStart(ExceptionInfo *info, unsigned int pmem_size, void *orig_brk, ch
 
     if (initActive == 1){
         initActive = 0;
+        TracePrintf(0, "Attempting to load something!\n");
         if (cmd_args[0] == NULL) {
             char* loadInputs[2] = {"init", NULL};
             if (LoadProgram(loadInputs[0], loadInputs, init, info) != 0){
