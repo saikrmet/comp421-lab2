@@ -10,7 +10,8 @@
 // create a helper for read to go thru the buf and see if theres a new line
 int newline(int terminal) {
     int head = bufs[terminal].head;
-    for (int c = 0; c < bufs[terminal].size; c++) {
+    int c;
+    for (c = 0; c < bufs[terminal].size; c++) {
         if (bufs[terminal].term_buffer[head] == '\n') return 1;
         head = (1+head) % TERMINAL_MAX_LINE;
     }
@@ -20,7 +21,8 @@ int newline(int terminal) {
 void createBufs() {
     // allocate enough so you need to multiply total terminals by size 
     bufs = malloc(NUM_TERMINALS * sizeof(struct bufStruct));
-    for (int c = 0; c < NUM_TERMINALS; c++) {
+    int c;
+    for (c = 0; c < NUM_TERMINALS; c++) {
         bufs[c].head = 0;
         bufs[c].tail = 0;
     }
@@ -35,7 +37,8 @@ int readBuf(char *buffer, int terminal, int size) {
     }
     int chars = 0;
     int head = bufs[terminal].head;
-    for (int c = 0; c < size; c++) {
+    int c;
+    for (c = 0; c < size; c++) {
         if (bufs[terminal].size < 1) {
             break;
         }
@@ -59,7 +62,8 @@ int writeBuf(char *buffer, int terminal, int blocked, int size) {
         }
     }
     int chars = 0;
-    for (int c = 0; c < size; c++) {
+    int c;
+    for (c = 0; c < size; c++) {
         if (bufs[terminal].size != TERMINAL_MAX_LINE) {
             bufs[terminal].size += 1;
             int produce = bufs[terminal].tail;

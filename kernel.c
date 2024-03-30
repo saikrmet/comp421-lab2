@@ -26,8 +26,8 @@ void KernelStart(ExceptionInfo *info, unsigned int pmem_size, void *orig_brk, ch
     markOccupied((void*) KERNEL_STACK_BASE, (void*) KERNEL_STACK_LIMIT);
 
     void** interVecTable = malloc(sizeof(void*) * TRAP_VECTOR_SIZE);
-
-    for (int i = 0; i < TRAP_VECTOR_SIZE; i++){
+    int i;
+    for (i = 0; i < TRAP_VECTOR_SIZE; i++){
         if (i == TRAP_TTY_RECEIVE) {
             interVecTable[i] = trap_tty_receive_handler;
         } else if (i == TRAP_TTY_TRANSMIT) {

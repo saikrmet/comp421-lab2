@@ -16,7 +16,8 @@ struct ptEntry *headPTEntry;
 // returns the number of active pages currently 
 int activePages(struct pte *page) {
     int pages = 0;
-    for (int c = 0; c < PAGE_TABLE_LEN - KERNEL_STACK_PAGES; c++) {
+    int c;
+    for (c = 0; c < PAGE_TABLE_LEN - KERNEL_STACK_PAGES; c++) {
         pages++;
     }
     return pages; 
@@ -24,7 +25,8 @@ int activePages(struct pte *page) {
 
 // set the correct fields for the first page
 void updateFirstPage(struct pte *page) {
-    for (int c = 0; c < PAGE_TABLE_LEN; c++) { 
+    int c;
+    for (c = 0; c < PAGE_TABLE_LEN; c++) { 
         if (c < KERNEL_STACK_BASE / PAGESIZE) { 
             page[c].uprot = PROT_READ | PROT_WRITE | PROT_EXEC;
             page[c].kprot = PROT_NONE;
@@ -39,7 +41,8 @@ void updateFirstPage(struct pte *page) {
 }
 
 void updatePages(struct pte *page) {
-    for (int c = 0; c < PAGE_TABLE_LEN; c++) {
+    int c;
+    for (c = 0; c < PAGE_TABLE_LEN; c++) {
         if (c >= KERNEL_STACK_BASE / PAGESIZE ) {
             page[c].uprot = PROT_NONE;
             page[c].kprot = PROT_READ | PROT_WRITE;
@@ -56,8 +59,8 @@ void updatePages(struct pte *page) {
 // first thing you run when 
 struct pte* initializePageTables() {
     page_table = malloc(PAGE_TABLE_SIZE);
-
-    for (int c = 0; c < PAGE_TABLE_LEN; c++) {
+    int c;
+    for (c = 0; c < PAGE_TABLE_LEN; c++) {
         if (c < UP_TO_PAGE((long)getBrk() - (long)VMEM_1_BASE) / PAGESIZE) {
             page_table[c].kprot = PROT_READ | PROT_WRITE;
             page_table[c].valid = 1;
@@ -136,7 +139,8 @@ void initializePTEntry() {
 }
 
 void deletePT(struct pte* pt) {
-    for (int c = 0; c < VMEM_0_LIMIT / PAGESIZE; c++) {
+    int c;
+    for (c = 0; c < VMEM_0_LIMIT / PAGESIZE; c++) {
         if (pt[c].valid == 1) {
             if (pt[c].pfn >= KERNEL_STACK_BASE / PAGESIZE) {
                 Halt();

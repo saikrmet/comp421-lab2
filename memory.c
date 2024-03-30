@@ -36,7 +36,8 @@ void* getBrk() {
 }
 
 void markOccupied(void* ptr1, void* ptr2) {
-    for (int c = DOWN_TO_PAGE(ptr1) / PAGESIZE; c < UP_TO_PAGE(ptr2) / PAGESIZE; c++){
+    int c;
+    for (c = DOWN_TO_PAGE(ptr1) / PAGESIZE; c < UP_TO_PAGE(ptr2) / PAGESIZE; c++){
         p_page_occ[c] = 1;
     }
 }
@@ -45,7 +46,8 @@ void markOccupied(void* ptr1, void* ptr2) {
 // multiple times throughout this file. 
 int numFreePages() {
     int num = 0;
-    for (int c = 0; c < p_pages; c++) {
+    int c;
+    for (c = 0; c < p_pages; c++) {
         if (p_page_occ[c] == 0) {
             num++;
         }
@@ -60,7 +62,8 @@ unsigned int findPhysPage(){
     } else {
         page_index = MEM_INVALID_PAGES;
     }
-    for (int c = page_index; c < p_pages; c++) {
+    int c;
+    for (c = page_index; c < p_pages; c++) {
         if (p_page_occ[c] == 0) {
             p_page_occ[c] = 1;
             return c;
@@ -107,7 +110,8 @@ void brkHandler(ExceptionInfo *exInfo) {
         // set valid to false 
         // free the current page 
         // and lastly write to the register to flush the TLB
-        for (int c = 0; c < (long)UP_TO_PAGE(k_brk) - (long)UP_TO_PAGE(addr) / PAGESIZE; c++) {
+        int c;
+        for (c = 0; c < (long)UP_TO_PAGE(k_brk) - (long)UP_TO_PAGE(addr) / PAGESIZE; c++) {
             user_page_table[(long)UP_TO_PAGE(k_brk) / PAGESIZE - 1 - c].valid = 0; 
             freePP(user_page_table[(long)UP_TO_PAGE(k_brk) / PAGESIZE - 1 - c].pfn);
             WriteRegister(REG_TLB_FLUSH, (RCS421RegVal)((long)UP_TO_PAGE(k_brk) / PAGESIZE - 1 - c));
@@ -118,7 +122,8 @@ void brkHandler(ExceptionInfo *exInfo) {
 			exInfo->regs[0] = ERROR;
 			return;
 		} else {
-			for(int c = 0; c < ((long)UP_TO_PAGE(addr) - (long)UP_TO_PAGE(k_brk)) / PAGESIZE; c++) {
+            int c;
+			for(c = 0; c < ((long)UP_TO_PAGE(addr) - (long)UP_TO_PAGE(k_brk)) / PAGESIZE; c++) {
 				user_page_table[c + (long)UP_TO_PAGE(k_brk) / PAGESIZE].valid = 1;
 				user_page_table[c + (long)UP_TO_PAGE(k_brk) / PAGESIZE].pfn = findPhysPage();
 			}
@@ -132,7 +137,8 @@ void brkHandler(ExceptionInfo *exInfo) {
 int SetKernelBrk(void *addr) {
     if (vm_enabled == 1) {
         if ((((long)UP_TO_PAGE(addr) - (long)user_brk) / PAGESIZE) <= numFreePages()) {
-            for (int c = 0; c < ((long)UP_TO_PAGE(addr) - (long)user_brk) / PAGESIZE; c++) {
+            int c;
+            for (c = 0; c < ((long)UP_TO_PAGE(addr) - (long)user_brk) / PAGESIZE; c++) {
                 if (page_table[c + ((long)user_brk - VMEM_1_BASE) / PAGESIZE].valid == 1) {
                     Halt();
                 }
@@ -195,7 +201,8 @@ int growUserProcessStack(ExceptionInfo *exInfo, struct pcbEntry *head) {
     unsigned long new = DOWN_TO_PAGE(addr) / PAGESIZE;
     int diff = curr - new;
     if (new < curr && curr > (unsigned long)(UP_TO_PAGE(head->data->brk) / PAGESIZE) && (unsigned long)addr < VMEM_0_LIMIT && (unsigned long)addr > MEM_INVALID_SIZE && diff <= numFreePages()) {
-        for (int c = 0; c < diff; c++) {
+        int c;
+        for (c = 0; c < diff; c++) {
             WriteRegister(REG_TLB_FLUSH, (RCS421RegVal)(curr - 1 - c));
             head->data->pcbPT[curr - 1 - c].pfn = findPhysPage();
             head->data->pcbPT[curr - 1 - c].uprot = PROT_READ | PROT_WRITE;
