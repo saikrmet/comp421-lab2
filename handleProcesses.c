@@ -90,7 +90,7 @@ void addPcbEntry(struct pcbStruct *pcb) {
 }
 
 // get the pid from current pcb 
-int getPid() {
+int getCurrPid() {
     if (!isWaiting) {
         return start->data->pid; 
     }
