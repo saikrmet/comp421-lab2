@@ -2,29 +2,16 @@
 #include <stdlib.h>
 #include <comp421/hardware.h>
 #include <comp421/yalnix.h>
-#include "memory.c"
-#include "handleProcceses.c"
+#include "memory.h"
+#include "handleProcceses.h"
+#include "pageTableController.h"
 
 
 // add headers
 
 //  create a linked list structure. 
-struct ptEntry{
-    void *base;
-    int region1_free;
-    int region0_free;
-    struct ptEntry *next;
-    int pfn;
-};
 struct pte *page_table;
 struct ptEntry *headPTEntry;
-int activePages(struct pte *page);
-void updateFirstPage(struct pte *page);
-void updatePages(struct pte *page);
-struct pte* initializePageTables();
-struct pte* initializePageTable();
-void initializePTEntry();
-void deletePT(struct pte* pt);
 
 int activePages(struct pte *page) {
     int pages = 0;
