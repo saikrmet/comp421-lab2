@@ -74,7 +74,7 @@ void createProcess(int terminate) {
         clockTick = 0;
         struct pcbEntry* entry = start;
         start = start->next;
-        changePcb(waitPcb, start->data);
+        changePcb(start->data, waitPcb);
     }
     else {
         if (!checkBlocking(start->data) && isWaiting == 1) {

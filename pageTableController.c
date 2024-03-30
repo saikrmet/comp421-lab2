@@ -1,7 +1,4 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <comp421/hardware.h>
-#include <comp421/yalnix.h>
 #include "memory.h"
 #include "handleProcesses.h"
 #include "pageTableController.h"
@@ -58,22 +55,25 @@ void updatePages(struct pte *page) {
 
 // first thing you run when 
 struct pte* initializePageTables() {
+    TracePrintf(1, "starting initialization of page tabels");
     page_table = malloc(PAGE_TABLE_SIZE);
+    int text = ((long)&_etext - (long)VMEM_1_BASE) / PAGESIZE;
     int c;
     for (c = 0; c < PAGE_TABLE_LEN; c++) {
         if (c < UP_TO_PAGE((long)getBrk() - (long)VMEM_1_BASE) / PAGESIZE) {
             page_table[c].kprot = PROT_READ | PROT_WRITE;
             page_table[c].valid = 1;
         }
-        else if (c < ((long)&_etext - (long)VMEM_1_BASE) / PAGESIZE) {
-            page_table[c].kprot = PROT_READ | PROT_EXEC;
+        else if (c < text) {
             page_table[c].valid = 1;
+            page_table[c].kprot = PROT_READ | PROT_EXEC;
+            
         }
         else {
             page_table[c].kprot = PROT_READ | PROT_WRITE;
             page_table[c].valid = 0;
         }
-        page_table[c].pfn = c + (long)VMEM_1_BASE / PAGESIZE;
+        page_table[c].pfn = c + ((long)VMEM_1_BASE / PAGESIZE);
         page_table[c].uprot = PROT_NONE;
     }
     return page_table;
