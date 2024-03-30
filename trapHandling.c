@@ -129,7 +129,7 @@ void fork_handler(ExceptionInfo *exInfo) {
     prevPCB->children++;
     forkPcb(prevPCB, nextPCB);
 
-    exInfo->regs[0] = (currPid != nextPid) ? nextPid : 0;
+    exInfo->regs[0] = (getCurrPid() != nextPid) ? nextPid : 0;
 }
 
 void delay_handler(ExceptionInfo *exInfo) {
@@ -155,7 +155,7 @@ void delay_handler(ExceptionInfo *exInfo) {
 void tty_read_handler(ExceptionInfo *exInfo) {
     int terminal = exInfo->regs[1];
 
-    if (terminal > 0 && terminal < NUM_TERMINALS) {
+    if (terminal >= 0 && terminal <= NUM_TERMINALS) {
         void* buffer = (void*) exInfo->regs[2];
 
         int size = exInfo->regs[3];
@@ -165,14 +165,13 @@ void tty_read_handler(ExceptionInfo *exInfo) {
 
     } else {
         exInfo->regs[0] = ERROR;
-        return;
     }
 }
 
 void tty_write_handler(ExceptionInfo *exInfo) {
     int terminal = exInfo->regs[1];
 
-    if (terminal > 0 && terminal < NUM_TERMINALS) {
+    if (terminal >= 0 && terminal <= NUM_TERMINALS) {
         void* buffer = (void*) exInfo->regs[2];
         int size = exInfo->regs[3];
 
@@ -187,7 +186,6 @@ void tty_write_handler(ExceptionInfo *exInfo) {
 
     } else {
         exInfo->regs[0] = ERROR;
-        return;
     }
 }
 
@@ -313,7 +311,7 @@ void trap_math_handler(ExceptionInfo *exInfo) {
 
 void trap_memory_handler(ExceptionInfo *exInfo) {
     struct pcbEntry* entry = getActivePcb();
-    if (!growUserProcessStack(exInfo, entry)) {
+    if (growUserProcessStack(exInfo, entry) != 1) {
         printf("Accessing memory illegally for process %d", entry->data->pid);
         exit_handler(exInfo, 1);
     }
