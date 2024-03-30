@@ -228,7 +228,7 @@ LoadProgram(char *name, char **args, struct pcbStruct* loadPCB, ExceptionInfo* e
         invalidPTE++;
     }
 
-    struct pcbEntry* activeProcess = getActivePCB();
+    struct pcbEntry* activeProcess = getActivePcb();
     struct pcbStruct* activePCB = activeProcess->data;
     int addr = (data_bss_npg + text_npg + MEM_INVALID_PAGES) * PAGESIZE;
     activePCB->brk = (void*) UP_TO_PAGE(addr);

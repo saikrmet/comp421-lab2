@@ -18,7 +18,7 @@ unsigned int findPhysPage();
 unsigned int recentFreePP();
 void freePP(unsigned int idx);
 int SetKernelBrk(void *addr);
-void brkHandler(ExceptionInfo *info);
+void brkHandler(ExceptionInfo *exInfo);
 void openPageSpace();
 void* getCreatePageSpace();
 void* vToP(void *addr);
@@ -151,7 +151,7 @@ int SetKernelBrk(void *addr) {
 }
 
 void brkHandler(ExceptionInfo *exInfo) {
-	struct pcbEntry *process = getActivePCB();
+	struct pcbEntry *process = getActivePcb();
 	struct pcbStruct *block = process->data;
 	void *k_brk = block->brk;
 	void *stack = block->stackSize;
