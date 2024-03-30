@@ -1,4 +1,13 @@
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <comp421/hardware.h>
+#include <comp421/yalnix.h>
+#include "trphandler.c"
+#include "pcb.c"
+#include "pageTableController.c"
+#include "contextSwitch.c"
+
 
 int currPid = 2; 
 struct pcbEntry *start = NULL;
@@ -122,8 +131,8 @@ void activateRead(int read) {
     struct pcbEntry *entry = getStaringPcb();
     while (entry) {
         struct pcbStrict *new_pcb = entry->data;
-        if (new_pcb->callProduce == read) {
-            new_pcb->callProduce == -1;
+        if (new_pcb->callRead == read) {
+            new_pcb->callRead == -1;
             return;
         }
         entry = entry->next;
