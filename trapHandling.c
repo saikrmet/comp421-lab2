@@ -1,6 +1,11 @@
-
-
-
+#include "trapHandling.h"
+#include "terminalHandler.h"
+#include "handleProcesses.h"
+#include "pcb.h"
+#include "load.h"
+#include "memory.h"
+#include "pageTableController.h"
+#include "contextSwitch.h"
 
 void trap_kernel_handler(ExceptionInfo *exInfo) {
 

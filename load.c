@@ -12,6 +12,12 @@
 
 #include <comp421/hardware.h>
 #include <comp421/loadinfo.h>
+#include "load.h"
+#include "pcb.h"
+#include "handleProcesses.h"
+#include "memory.h"
+#include "pageTableController.h"
+
 
 /*
  *  Load a program into the current process's address space.  The

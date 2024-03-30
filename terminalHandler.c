@@ -1,6 +1,10 @@
 #include <stdlib.h>
 #include <comp421/hardware.h>
 #include <comp421/yalnix.h>
+
+#include "trapHandling.h"
+#include "handleProcesses.h"
+#include "pcb.h"
 #include "terminalHandler.h"
 
 // create a helper for read to go thru the buf and see if theres a new line

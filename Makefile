@@ -33,8 +33,8 @@ ALL = yalnix idle init samples-lab2/bigstack samples-lab2/blowstack samples-lab2
 #	make up your kernel, and KERNEL_SRCS should  be a list of
 #	the corresponding source files that make up your kernel.
 #
-KERNEL_OBJS = contextSwitch.o handleProcesses.o kernel.o load.o pageTableController.o memory.o pcb.o terminalHandler.o trapHandling.o
-KERNEL_SRCS = contextSwitch.c handleProcesses.c kernel.c load.c pageTableController.c memory.c pcb.c terminalHandler.c trapHandling.c samples-lab2/bigstack.c samples-lab2/blowstack.c samples-lab2/brktest.c samples-lab2/console.c samples-lab2/delaytest.c samples-lab2/exectest.c samples-lab2/forktest0.c samples-lab2/forktest1.c samples-lab2/forktest1b.c samples-lab2/forktest2.c samples-lab2/forktest2b.c samples-lab2/forktest3.c samples-lab2/forkwait0c.c samples-lab2/forkwait0p.c samples-lab2/forkwait1.c samples-lab2/forkwait1b.c samples-lab2/forkwait1c.c samples-lab2/forkwait1d.c samples-lab2/init.c samples-lab2/init1.c samples-lab2/init2.c samples-lab2/init3.c samples-lab2/shell.c samples-lab2/trapillegal.c samples-lab2/trapmath.c samples-lab2/trapmemory.c samples-lab2/ttyread1.c samples-lab2/ttywrite1.c samples-lab2/ttywrite2.c samples-lab2/ttywrite3.c
+KERNEL_OBJS = kernel.o memory.o pageTableController.o pcb.o handleProcesses.o trapHandling.o load.o contextSwitch.o terminalHandler.o 
+KERNEL_SRCS = kernel.c memory.c pageTableController.c pcb.c handleProcesses.c trapHandling.c load.c contextSwitch.c terminalHandler.c samples-lab2/bigstack.c samples-lab2/blowstack.c samples-lab2/brktest.c samples-lab2/console.c samples-lab2/delaytest.c samples-lab2/exectest.c samples-lab2/forktest0.c samples-lab2/forktest1.c samples-lab2/forktest1b.c samples-lab2/forktest2.c samples-lab2/forktest2b.c samples-lab2/forktest3.c samples-lab2/forkwait0c.c samples-lab2/forkwait0p.c samples-lab2/forkwait1.c samples-lab2/forkwait1b.c samples-lab2/forkwait1c.c samples-lab2/forkwait1d.c samples-lab2/init.c samples-lab2/init1.c samples-lab2/init2.c samples-lab2/init3.c samples-lab2/shell.c samples-lab2/trapillegal.c samples-lab2/trapmath.c samples-lab2/trapmemory.c samples-lab2/ttyread1.c samples-lab2/ttywrite1.c samples-lab2/ttywrite2.c samples-lab2/ttywrite3.c
 
 #
 #	You should not have to modify anything else in this Makefile
@@ -45,7 +45,7 @@ KERNEL_SRCS = contextSwitch.c handleProcesses.c kernel.c load.c pageTableControl
 PUBLIC_DIR = /clear/courses/comp421/pub
 
 CPPFLAGS = -I$(PUBLIC_DIR)/include
-CFLAGS = -g -Wall -Wextra -Werror
+CFLAGS = -g -Wall -Wextra -Werror -Wno-unused-parameter -Wno-unused-variable
 
 LANG = gcc
 

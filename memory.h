@@ -2,21 +2,21 @@
 #include <comp421/hardware.h>
 #include <comp421/yalnix.h>
 #include <stdlib.h>
+#include "handleProcesses.h"
+#pragma once
 
 
-
-void createPhysicalPages(unsigned int page_length);
 void startBrk(void *oldBrk);
 void* getBrk();
-void markOccupied(void* ptr1, void* ptr2);
+void createPhysicalPages(unsigned int page_length);
 int numFreePages();
-void startVM();
-int growUserProcessStack(ExceptionInfo *exInfo, struct pcbEntry *head);
+void markOccupied(void* ptr1, void* ptr2);
 unsigned int findPhysPage();
 unsigned int recentFreePP();
 void freePP(unsigned int idx);
-int SetKernelBrk(void *addr);
 void brkHandler(ExceptionInfo *exInfo);
+void* vToP(void *addr);
+void startVM();
 void openPageSpace();
 void* getCreatePageSpace();
-void* vToP(void *addr);
+int growUserProcessStack(ExceptionInfo *exInfo, struct pcbEntry *head);

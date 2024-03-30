@@ -4,8 +4,15 @@
 #include <comp421/yalnix.h>
 #include <comp421/loadinfo.h>
 
-#include "memory.c"
-#include "pageTableController.c"
+#include "memory.h"
+#include "pcb.h"
+#include "handleProcesses.h"
+#include "pageTableController.h" 
+#include "trapHandling.h"
+#include "load.h"
+#include "terminalHandler.h"
+#include "contextSwitch.h"
+
 
 
 void KernelStart(ExceptionInfo *info, unsigned int pmem_size, void *orig_brk, char **cmd_args){
@@ -57,7 +64,7 @@ void KernelStart(ExceptionInfo *info, unsigned int pmem_size, void *orig_brk, ch
 
     startVM();
     openPageSpace();
-    createIOBufs();
+    createBufs();
 
     //Create init process
     struct pcbStruct* init = createPcb(1, -1, idle);

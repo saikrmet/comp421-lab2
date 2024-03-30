@@ -3,7 +3,7 @@
 #include <comp421/hardware.h>
 #include <comp421/yalnix.h>
 #include "memory.h"
-#include "handleProcceses.h"
+#include "handleProcesses.h"
 #include "pageTableController.h"
 
 
@@ -44,7 +44,7 @@ void updatePages(struct pte *page) {
             page[c].uprot = PROT_NONE;
             page[c].kprot = PROT_READ | PROT_WRITE;
             page[c].valid = 1;
-            page[c].pfn = i;
+            page[c].pfn = c;
         } else { 
             page[c].uprot = PROT_READ | PROT_WRITE | PROT_EXEC;
             page[c].kprot = PROT_READ | PROT_WRITE;
@@ -126,7 +126,7 @@ void initializePTEntry() {
     ptEntry->region0_full = -1;
     ptEntry->base = base;
 
-    unsigned int get_pfn = getTopFreePhysicalPage();
+    unsigned int get_pfn = recentFreePP();
     ptEntry->pfn = get_pfn;
     page_table[(long)(pageBase - VMEM_1_BASE) / PAGESIZE].pfn = get_pfn;
 
