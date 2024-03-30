@@ -72,8 +72,8 @@ void startVM() {
     vm_enabled = 1; 
 }
 
-int growUserProcessStack(ExceptionInfo *info, struct pcbEntry *head) {
-    void* addr = info->addr;
+int growUserProcessStack(ExceptionInfo *exInfo, struct pcbEntry *head) {
+    void* addr = exInfo->addr;
     unsigned long curr = DOWN_TO_PAGE(head->data->stackSize) / PAGESIZE;
     unsigned long new = DOWN_TO_PAGE(addr) / PAGESIZE;
     if (new < curr && curr > (unsigned long)(UP_TO_PAGE(head->data->brk) / PAGESIZE) && (unsigned long)addr < VMEM_0_LIMIT && (unsigned long)addr > MEM_INVALID_SIZE && curr - new <= numFreePages()) {
@@ -150,7 +150,7 @@ int SetKernelBrk(void *addr) {
     return 0;
 }
 
-void brkHandler(ExceptionInfo *info) {
+void brkHandler(ExceptionInfo *exInfo) {
 	struct pcbEntry *process = getActivePCB();
 	struct pcbStruct *block = process->data;
 	void *k_brk = block->brk;
@@ -158,12 +158,12 @@ void brkHandler(ExceptionInfo *info) {
 
 	struct pte *user_page_table = block->pcbPT;
 
-    void *addr = (void*)info->regs[1];
+    void *addr = (void*)exInfo->regs[1];
 
     // account for addresses that aren't valid
 
     if (MEM_INVALID_SIZE >= UP_TO_PAGE(addr) || DOWN_TO_PAGE(stack) - 1 <= UP_TO_PAGE(addr)){
-        info->regs[0] = ERROR;
+        exInfo->regs[0] = ERROR;
         return; 
     }
 
@@ -180,7 +180,7 @@ void brkHandler(ExceptionInfo *info) {
     } else if (UP_TO_PAGE(k_brk) < UP_TO_PAGE(addr)) {
 		// not enough physical memory
 		if(freePhysPage() < ((long)UP_TO_PAGE(addr) - (long)UP_TO_PAGE(k_brk)) / PAGESIZE) {
-			info->regs[0] = ERROR;
+			exInfo->regs[0] = ERROR;
 			return;
 		} else {
 			for(int c = 0; c < ((long)UP_TO_PAGE(addr) - (long)UP_TO_PAGE(k_brk)) / PAGESIZE; c++) {
@@ -191,7 +191,7 @@ void brkHandler(ExceptionInfo *info) {
     }
 
     block->brk = (void*)UP_TO_PAGE(addr);
-    info->regs[0] = 0;
+    exInfo->regs[0] = 0;
 }
 
 void openPageSpace() {
