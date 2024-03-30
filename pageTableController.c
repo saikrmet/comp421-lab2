@@ -13,6 +13,7 @@
 struct pte *page_table;
 struct ptEntry *headPTEntry;
 
+// returns the number of active pages currently 
 int activePages(struct pte *page) {
     int pages = 0;
     for (int c = 0; c < PAGE_TABLE_LEN - KERNEL_STACK_PAGES; c++) {
@@ -21,6 +22,7 @@ int activePages(struct pte *page) {
     return pages; 
 }
 
+// set the correct fields for the first page
 void updateFirstPage(struct pte *page) {
     for (int c = 0; c < PAGE_TABLE_LEN; c++) { 
         if (c < KERNEL_STACK_BASE / PAGESIZE) { 
@@ -51,8 +53,6 @@ void updatePages(struct pte *page) {
     }
 }
 
-
-// initKernelPT
 // first thing you run when 
 struct pte* initializePageTables() {
     page_table = malloc(PAGE_TABLE_SIZE);
