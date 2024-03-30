@@ -188,7 +188,7 @@ void activateRead(int read) {
 struct pcbStruct* getProducerProcess(int id) {
     struct pcbEntry *starting = getStartingPcb();
 
-    while (starting) {
+    while (starting != NULL) {
         struct pcbStruct *new_pcb = starting->data;
         if (new_pcb->termProducing == id) {
             return new_pcb;
