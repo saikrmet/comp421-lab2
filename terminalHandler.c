@@ -6,14 +6,15 @@
 
 // create a helper for read to go thru the buf and see if theres a new line
 int newline(int terminal) {
-   int head = bufs[terminal].head;
-   int c;
-   int ln = bufs[terminal].size;
-   for (c = 0; c < ln; c++) {
-       if (bufs[terminal].term_buffer[head] == '\n') return 1;
-       head = (1+head) % TERMINAL_MAX_LINE;
-   }
-   return 0;
+    TracePrintf(1, "newline called\n");
+    int head = bufs[terminal].head;
+    int c;
+    int ln = bufs[terminal].size;
+    for (c = 0; c < ln; c++) {
+    if (bufs[terminal].term_buffer[head] == '\n') return 1;
+        head = (1+head) % TERMINAL_MAX_LINE;
+    }
+    return 0;
 }
 
 
@@ -32,13 +33,8 @@ void createBufs() {
 
 
 int readBuf(char *buffer, int terminal, int size) {
-    TracePrintf(1, "read buf");
+    TracePrintf(1, "read buf \n");
     struct pcbStruct *pcb = getActivePcb()->data;
-    // loop thru until newline
-    while (!newline(terminal)) {
-        pcb->callRead = terminal;
-        createProcess(0);
-    }
     int chars = 0;
     int head = bufs[terminal].head;
     int c;
@@ -60,16 +56,18 @@ int readBuf(char *buffer, int terminal, int size) {
 
 
 int writeBuf(char *buffer, int terminal, int blocked, int size) {
-    TracePrintf(1,"write buf \n");
     if (blocked) {
-        while (getProducerProcess(terminal) != NULL) {
-            struct pcbStruct *pcb = getActivePcb()->data;
-            pcb->callProduce = terminal;
-            createProcess(0);
-        }
+         while (getProducerProcess(terminal) != NULL) {
+             struct pcbStruct *pcb = getActivePcb()->data;
+             pcb->callProduce = terminal;
+             createProcess(0);
+         }
     }
+    TracePrintf(1,"write buf \n");
     int chars = 0;
     int c;
+
+    
     for (c = 0; c < size; c++) {
         if (bufs[terminal].size != TERMINAL_MAX_LINE) {
             bufs[terminal].size += 1;
@@ -81,3 +79,8 @@ int writeBuf(char *buffer, int terminal, int blocked, int size) {
     }
     return chars;
 }
+
+
+
+
+
