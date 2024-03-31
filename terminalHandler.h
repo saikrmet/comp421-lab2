@@ -9,9 +9,8 @@ struct bufStruct {
     int size;
     int head;
     int tail;
-    
 };
 int newline(int terminal);
 void createBufs();
 int readBuf(char *buffer, int terminal, int size);
-int writeBuf(char *buffer, int terminal, int blocked, int size);
+int writeBuf(char *buffer, int terminal, int size);

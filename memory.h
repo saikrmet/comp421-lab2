@@ -15,7 +15,6 @@ unsigned int findPhysPage();
 unsigned int recentFreePP();
 void freePP(unsigned int idx);
 void brkHandler(ExceptionInfo *exInfo);
-void* vToP(void *addr);
 void startVM();
 void openPageSpace();
 void* getCreatePageSpace();

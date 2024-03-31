@@ -48,6 +48,7 @@ struct pcbStruct* createPcb(int pid, int parentPid, struct pcbStruct* pcb) {
 }
 
 struct terminateEntry* removeTerminatedEntry(struct pcbStruct* data) {
+    TracePrintf(1, "terminate 2");
     struct terminateEntry *temp = data->terminateProcess;
     data->terminateProcess = temp->next;
     // need a temp variable to keep track of the old terminated process. 
@@ -62,6 +63,7 @@ void addTerminatedEntry(struct pcbStruct* pcb, int pid, int status) {
     temp->status = status;
     temp->pid = pid;
 
+    TracePrintf(1, "terminate 1");
     // grab current entry 
     struct terminateEntry *entry = pcb->terminateProcess;
     if (entry == NULL) {

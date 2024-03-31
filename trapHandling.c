@@ -45,19 +45,21 @@ void wait_handler(ExceptionInfo *exInfo) {
     int* user_args = (int*) exInfo->regs[1];
     struct pcbEntry* activeProcess = getActivePcb();
     struct pcbStruct* prevPCB = activeProcess->data;
-
-    if (prevPCB->children != 0) {
+    TracePrintf(1, "data: %d\n", prevPCB->children);
+    TracePrintf(1, "data: %d\n", prevPCB->terminateProcess == NULL);
+    if (prevPCB->children == 0) {
+        if (prevPCB->terminateProcess == NULL) {
+            exInfo->regs[0] = ERROR;
+            return;
+        }
+    } else {
         if (prevPCB->terminateProcess == NULL) {
             prevPCB->blockProcess = 1;
             createProcess(0);
         }
-        
-    } else if (prevPCB->terminateProcess == NULL) {
-            //Report error because no children
-            exInfo->regs[0] = ERROR;
-            return;
     }
 
+    TracePrintf(1, "wait handler no issues, got through \n");
     struct terminateEntry* exitProcess = removeTerminatedEntry(prevPCB);
     exInfo->regs[0] = exitProcess->pid;
     *user_args = exitProcess->status;
@@ -103,7 +105,9 @@ void exec_handler(ExceptionInfo *exInfo) {
     char** args = (char**) exInfo->regs[2];
 
     struct pcbEntry* start = getStartingPcb();
+    TracePrintf(1, "before loading in \n");
     int loadVal = LoadProgram(name, args, start->data, exInfo);
+    TracePrintf(1, "after loading with value %d \n", loadVal);
 
     if (loadVal == -2) {
         exit_handler(exInfo, 1);
@@ -113,6 +117,7 @@ void exec_handler(ExceptionInfo *exInfo) {
 }
 
 void fork_handler(ExceptionInfo *exInfo) {
+    TracePrintf(1, "fork called\n");
     struct pcbEntry* activeProcess = getActivePcb();
     struct pcbStruct* prevPCB = activeProcess->data;
 
@@ -128,13 +133,14 @@ void fork_handler(ExceptionInfo *exInfo) {
     int currPid = getCurrPid();
     struct pcbStruct* nextPCB = createPcb(nextPid, currPid, prevPCB);
     prevPCB->children++;
+    TracePrintf(1, "children, prevpcb: %d, pid: %d,\n", prevPCB->children, prevPCB->pid);
     forkPcb(prevPCB, nextPCB);
-
+    TracePrintf(1, "children after forkpcb: %d\n", getActivePcb()->data->children);
     exInfo->regs[0] = (getCurrPid() != nextPid) ? nextPid : 0;
 }
 
 void delay_handler(ExceptionInfo *exInfo) {
-    TracePrintf(1, "delay clock");
+    TracePrintf(1, "delay clock\n");
     int duration = exInfo->regs[1];
 
     //Invalid delay duration
@@ -177,7 +183,7 @@ void tty_write_handler(ExceptionInfo *exInfo) {
         void* buffer = (void*) exInfo->regs[2];
         int size = exInfo->regs[3];
 
-        int retNum = writeBuf(buffer, terminal, 1, size);
+        int retNum = writeBuf(buffer, terminal, size);
         TtyTransmit(terminal, buffer, retNum);
 
         struct pcbEntry *activeProcess = getActivePcb();
@@ -194,7 +200,7 @@ void tty_write_handler(ExceptionInfo *exInfo) {
 void trap_tty_receive_handler(ExceptionInfo *exInfo) {
     int terminal = exInfo->code;
     char *chars = malloc(TERMINAL_MAX_LINE * sizeof(char));
-    writeBuf(chars, terminal, 0, TtyReceive(terminal, chars, TERMINAL_MAX_LINE));
+    writeBuf(chars, terminal, TtyReceive(terminal, chars, TERMINAL_MAX_LINE));
 
     if (newline(terminal)) {
         activateRead(terminal);
@@ -318,7 +324,7 @@ void trap_math_handler(ExceptionInfo *exInfo) {
 void trap_memory_handler(ExceptionInfo *exInfo) {
     struct pcbEntry* entry = getActivePcb();
     if (growUserProcessStack(exInfo, entry) != 1) {
-        printf("Accessing memory illegally for process %d", entry->data->pid);
+        printf("Accessing memory illegally for process %d\n", entry->data->pid);
         exit_handler(exInfo, 1);
     }
 }

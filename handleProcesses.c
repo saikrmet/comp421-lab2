@@ -57,6 +57,8 @@ int minusDelay() {
 }
 
 void cleanExitProcess() {
+    TracePrintf(1, "exiting proces \n");
+    TracePrintf(1, "exiting proces %d \n", exitProcess);
     if (exitProcess == NULL) {
         return;
     }

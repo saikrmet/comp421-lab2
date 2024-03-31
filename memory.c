@@ -177,24 +177,6 @@ void startVM() {
     vm_enabled = 1; 
 }
 
-// change from virtual address to physical address 
-void* vToP(void *addr) {
-    // we need to get the virtual page base address 
-    void* virtual_address = (void*)DOWN_TO_PAGE(addr);
-    int v_pfn;
-    if (virtual_address >= (void*)VMEM_1_BASE) {
-        v_pfn = page_table[((long)virtual_address - VMEM_1_BASE) / PAGESIZE].pfn;
-    } else {
-        struct pcbEntry *currProcess = getStartingPcb();
-        v_pfn = currProcess->data->pcbPT[((long)virtual_address) / PAGESIZE].pfn;
-    }
-    // procure the physical address needed to offset 
-    void* physical_address = (void*) (long)(v_pfn * PAGESIZE);
-
-    // add the addr given & PAGEOFFSET to get the offset 
-    return (void *) (((long) physical_address) + ((long)addr & PAGEOFFSET));
-}
-
 void openPageSpace() {
     createPageSpace = malloc(PAGESIZE);
 }

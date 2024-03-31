@@ -1,26 +1,21 @@
 #include <stdio.h>
 #include <comp421/yalnix.h>
 
+/* exectest progname args... */
+/* for fun: exectest exectest exectest exectest exectest progname args... */
 int
 main(int argc, char **argv)
 {
-    setbuf(stdout, NULL);
+    int i;
 
-    printf("FORK1> This program is a simple test of Fork()\n");
-    printf("FORK1> BEFORE Fork(): If nothing else is printed, Fork fails \n");
-
-    if (Fork() == 0) {
-	printf("CHILD\n");
-    }
-    else {
-	printf("PARENT\n");
-	Delay(8);
-	printf("FORK1> You should have seen \"CHILD\" and \"PARENT\" printed\n");
-	printf("FORK1> in the order in which they were scheduled\n");
-	printf("FORK1> If you missed one or the other, the kernel\n");
-	printf("FORK1> does NOT switch contexts!!!\n");
-
+    for (i = 0; i < argc; i++) {
+	fprintf(stderr, "argv[%d] = %p", i, argv[i]);
+	fprintf(stderr, " = '%s'\n", argv[i]);
     }
 
-    Exit(0);
+    Exec(argv[1], argv + 1);
+
+    fprintf(stderr, "Exec did not work!!\n");
+
+    Exit(1);
 }
