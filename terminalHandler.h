@@ -13,4 +13,4 @@ struct bufStruct {
 int newline(int terminal);
 void createBufs();
 int readBuf(char *buffer, int terminal, int size);
-int writeBuf(char *buffer, int terminal, int size);
+int writeBuf(char *buffer, int terminal, int blocked, int size);

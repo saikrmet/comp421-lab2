@@ -55,10 +55,19 @@ int readBuf(char *buffer, int terminal, int size) {
 
 
 
-int writeBuf(char *buffer, int terminal, int size) {
+int writeBuf(char *buffer, int terminal, int blocked, int size) {
+    if (blocked) {
+         while (getProducerProcess(terminal) != NULL) {
+             struct pcbStruct *pcb = getActivePcb()->data;
+             pcb->callProduce = terminal;
+             createProcess(0);
+         }
+    }
     TracePrintf(1,"write buf \n");
     int chars = 0;
     int c;
+
+    
     for (c = 0; c < size; c++) {
         if (bufs[terminal].size != TERMINAL_MAX_LINE) {
             bufs[terminal].size += 1;
