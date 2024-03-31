@@ -57,8 +57,6 @@ int minusDelay() {
 }
 
 void cleanExitProcess() {
-    TracePrintf(1, "exiting proces \n");
-    TracePrintf(1, "exiting proces %d \n", exitProcess);
     if (exitProcess == NULL) {
         return;
     }
@@ -77,7 +75,7 @@ void createProcess(int terminate) {
         struct pcbEntry* entry = start;
         start = start->next;
         
-        changePcb(waitPcb, start->data);
+        changePcb(entry->data, waitPcb);
     }
     else {
         if (!checkBlocking(start->data) && isWaiting == 1) {
@@ -160,7 +158,7 @@ struct pcbEntry* getActivePcb() {
 
 int popNewPid() {
     currPid++;
-    return currPid;
+    return currPid-1;
 }
 
 void activateProducer(int produce) {

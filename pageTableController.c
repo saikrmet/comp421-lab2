@@ -47,6 +47,7 @@ void initializePTEntry() {
 
 // set the correct fields for the first page
 void updateFirstPage(struct pte *page) {
+    TracePrintf(1, "first page update \n");
     int c;
     for (c = 0; c < PAGE_TABLE_LEN; c++) { 
         if (c < KERNEL_STACK_BASE / PAGESIZE) { 
@@ -63,18 +64,18 @@ void updateFirstPage(struct pte *page) {
 }
 
 void updatePages(struct pte *page) {
-    TracePrintf(1, "update pages");
+    TracePrintf(1, "update pages \n");
     int c;
     for (c = 0; c < PAGE_TABLE_LEN; c++) {
         if (c >= KERNEL_STACK_BASE / PAGESIZE ) {
-            page[c].uprot = PROT_NONE;
-            page[c].kprot = PROT_READ | PROT_WRITE;
             page[c].valid = 1;
+            page[c].kprot = PROT_READ | PROT_WRITE;
+            page[c].uprot = PROT_NONE;
             page[c].pfn = c;
         } else { 
+            page[c].valid = 0;
             page[c].uprot = PROT_READ | PROT_WRITE | PROT_EXEC;
             page[c].kprot = PROT_READ | PROT_WRITE;
-            page[c].valid = 0;
         }
     }
 }

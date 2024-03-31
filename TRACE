@@ -5,11 +5,13 @@ Kernel   starting setkernelbrk
 Kernel   starting initialization of page tables
 Kernel   starting initialization of page tabels entries
 Kernel   starting initialization of page table
+Kernel   first page update 
 Kernel   starting setkernelbrk
 Kernel   createbufs() start 
 Kernel   createbufs() worked 
  Kernel   starting initialization of page table
-Kernel   update pagesKernel   LoadProgram 'idle', args 0x1ff890
+Kernel   update pages 
+Kernel   LoadProgram 'idle', args 0x1ff890
 Kernel   LoadProgram: LoadInfo status 0
 Kernel   text_size 0x7000, data_size 0x130, bss_size 0x3098
 Kernel   entry 0x10100
@@ -17,8 +19,6 @@ Kernel   LoadProgram: size 5, argcount 1
 Kernel   LoadProgram: text_npg 7, data_bss_npg 4, stack_npg 1
 Kernel   children before context switch: 0, pid: 1
 Kernel   children after context switch: 0, pid: 1
-Kernel   exiting proces 
-Kernel   exiting proces 0 
 Kernel   Attempting to load something!
 Kernel   LoadProgram 'samples-lab2/forkwait1', args 0x1fffc0
 Kernel   LoadProgram: LoadInfo status 0
@@ -27,25 +27,48 @@ Kernel   entry 0x10100
 Kernel   LoadProgram: size 23, argcount 1
 Kernel   LoadProgram: text_npg 10, data_bss_npg 4, stack_npg 1
 Kernel   fork called
+Kernel   yeayeachildren, child: 0, pid: 1,
+Kernel   1prevPCB children: 0, pid: 1,
+Kernel   2nextPid children: 2, pid: 1,
 Kernel   starting setkernelbrk
 Kernel   starting initialization of page table
-Kernel   update pagesKernel   children, prevpcb: 1, pid: 1,
-Kernel   children before context switch: 0, pid: 3
-Kernel   children after context switch: 0, pid: 3
-Kernel   exiting proces 
-Kernel   exiting proces 0 
+Kernel   update pages 
+Kernel   AFTERchildren, prevpcb: 0, pid: 2,
+Kernel   AFTEREPREVPCBchildren, prevpcb: 1, pid: 2,
+Kernel   children before context switch: 0, pid: 2
+Kernel   children after context switch: 0, pid: 2
 Kernel   children after forkpcb: 0
 Kernel   terminate 1Kernel   exiting process occurring 
 Kernel   create process 1 
 Kernel   change pcb 
 Kernel   children after context switch: 0, pid: 0
-Kernel   exiting proces 
-Kernel   exiting proces 2192208 
 Kernel   delete pt 
-Kernel   children after forkpcb: 0
+Kernel   trap clock 
+Kernel   create process 0 
+Kernel   change pcb 
+Kernel   children after context switch: 1, pid: 1
+Kernel   children after forkpcb: 1
 Kernel   delay clock
 Kernel   create process 0 
 Kernel   switchIdle called 
+Kernel   change pcb 
+Kernel   trap clock 
+Kernel   create process 0 
+Kernel   switchIdle called 
+Kernel   trap clock 
+Kernel   create process 0 
+Kernel   change pcb 
 Kernel   wait handler 
-Kernel   data: 0
-Kernel   data: 1
+Kernel   terminate process: 0
+Kernel   create process 0 
+Kernel   switchIdle called 
+Kernel   change pcb 
+Kernel   trap clock 
+Kernel   create process 0 
+Kernel   switchIdle called 
+Kernel   trap clock 
+Kernel   create process 0 
+Kernel   switchIdle called 
+Kernel   trap clock 
+Kernel   create process 0 
+Kernel   switchIdle called 
